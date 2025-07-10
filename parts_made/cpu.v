@@ -495,7 +495,7 @@ module cpu (
 
     );
 
-    Unid_Control unid_control_(
+    control_unit unid_control_(
 
         clk,
         reset,
