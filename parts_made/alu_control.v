@@ -1,4 +1,4 @@
-module controller (
+module alu_control (
 
        input  wire gt,
        input  wire zero,

@@ -299,7 +299,7 @@ module cpu (
         Sl_16_32_Out
 
     );
-    controller controller_(
+    alu_control controller_(
 
        GT,
        ZERO,
