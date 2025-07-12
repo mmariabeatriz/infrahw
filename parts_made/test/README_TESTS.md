@@ -91,8 +91,8 @@ gtkwave test_j_type.vcd
 ### Sinais Monitorados
 - **Estados**: `current_state`, `counter`
 - **Controle**: `pc_write_enable`, `instruction_write`, `memory_write`, `register_write`
-- **MUXes**: `mux_a`, `mux_b`, `mux_alu_1`, `mux_alu_2`, `mux_pc`, etc.
-- **ALU**: `alu_control`, `shift_control`
+- **MUXes**: `mux_a`, `mux_b`, `mux_ula1`, `mux_ula2`, `mux_pc`, etc.
+- **ULA**: `ula_control`, `shift_control`
 - **Memória**: `load_size_control`, `store_size_control`
 - **Registradores especiais**: `hi_write`, `lo_write`
 - **Exceções**: `exception_control`

@@ -6,7 +6,7 @@ module cpu (
 );
 
     //Control Wires  (mux)
-    wire            Mux_WD_Memory_selector;
+    wire            Mux_Memory_WD_selector;
     wire            Mux_High_selector;
     wire            Mux_Low_selector;
     wire            Mux_Extend_selector;
@@ -14,12 +14,12 @@ module cpu (
     wire            Mux_Shift_Src_selector;
     wire [1:0]      Mux_Shift_Amt_selector;
     wire[1:0]       Mux_A_selector;
-    wire[1:0]       Mux_ALU1_selector; 
-    wire[1:0]       Mux_ALU2_selector;  
+    wire[1:0]       Mux_ULA1_selector; 
+    wire[1:0]       Mux_ULA2_selector;  
     wire[1:0]       Mux_PC_selector;
-    wire[1:0]       Mux_WR_Registers_selector;
+    wire[1:0]       Mux_Register_WR_selector;
     wire[2:0]       Mux_Address_selector;  
-    wire[2:0]       Mux_WD_Registers_selector;
+    wire[2:0]       Mux_Register_WD_selector;
 
     //Control Wires  (Registers)
     wire            PC_Load;
@@ -31,7 +31,7 @@ module cpu (
     wire            Low_Load;
     wire            A_Load;
     wire            B_Load;
-    wire            ALUOut_Load;
+    wire            ULAOut_Load;
 
     //Control Useless
     wire            NEGATIVE;
@@ -42,7 +42,7 @@ module cpu (
     //Control Wires  (Outros)
     wire            Store_Size_selector;
     wire [1:0]      Load_Size_selector;
-    wire [2:0]      ALU_selector;
+    wire [2:0]      ULA_selector;
     wire [2:0]      Shift_selector;
     wire            Memory_WR;
     wire            Reg_WR;
@@ -74,14 +74,14 @@ module cpu (
     wire [31:0]     Low_Out;
     wire [31:0]     A_Out;
     wire [31:0]     B_Out;
-    wire [31:0]     ALUOut_Out;
+    wire [31:0]     ULAOut_Out;
 
     //Data Wires (Mux)
     wire [31:0]     Mux_PC_Out;
     wire [31:0]     Mux_Address_Out;  
-    wire [31:0]     Mux_WD_Memory_Out;
-    wire [4:0]      Mux_WR_Registers_Out;
-    wire [31:0]     Mux_WD_Registers_Out;
+    wire [31:0]     Mux_Memory_WD_Out;
+    wire [4:0]      Mux_Register_WR_Out;
+    wire [31:0]     Mux_Register_WD_Out;
     wire [31:0]     Mux_High_Out;
     wire [31:0]     Mux_Low_Out;
     wire [15:0]     Mux_Extend_Out;
@@ -89,8 +89,8 @@ module cpu (
     wire [31:0]     Mux_B_Out;
     wire [31:0]     Mux_Shift_Src_Out;
     wire [4:0]      Mux_Shift_Amt_Out;
-    wire [31:0]     Mux_ALU1_Out; 
-    wire [31:0]     Mux_ALU2_Out;  
+    wire [31:0]     Mux_ULA1_Out; 
+    wire [31:0]     Mux_ULA2_Out;  
 
     //Data Wires (Outros)
     wire [31:0]     Store_Size_Out;
@@ -114,7 +114,7 @@ module cpu (
     wire [31:0]     Sign_Extend16_32_Out;
     wire [31:0]     Shift_Left32_32_Out;
     wire [27:0]     Shift_Left26_28_Out;
-    wire [31:0]     ALU_Result;
+    wire [31:0]     ULA_Result;
     wire [31:0]     Shift_Left16_32_Out;
 
     Registrador PC_(
@@ -128,15 +128,15 @@ module cpu (
     mux_Address mux_address_(
         Mux_Address_selector,
         PC_Out,
-        ALUOut_Out,
+        ULAOut_Out,
         Mux_Address_Out
     );
 
-    mux_WD_Memory mux_wd_MEM_(
-        Mux_WD_Memory_selector,
+    mux_Memory_WD mux_wd_MEM_(
+        Mux_Memory_WD_selector,
         B_Out,
         Store_Size_Out,
-        Mux_WD_Memory_Out
+        Mux_Memory_WD_Out
     );
 
     store_size store_size_(
@@ -158,7 +158,7 @@ module cpu (
         Mux_Address_Out,
         clk,
         Memory_WR,
-        Mux_WD_Memory_Out,
+        Mux_Memory_WD_Out,
         Memory_Out
     );
 
@@ -207,26 +207,26 @@ module cpu (
 
     );
 
-    mux_WR_Registers mux_wr_reg_(
+    mux_Register_WR mux_wr_reg_(
        
-       Mux_WR_Registers_selector,
+       Mux_Register_WR_selector,
        RT,
        IMMEDIATE,
-       Mux_WR_Registers_Out
+       Mux_Register_WR_Out
 
     );
 
-    mux_WD_Registers mux_wd_reg_(
+    mux_Register_WD mux_wd_reg_(
 
-       Mux_WD_Registers_selector,
+       Mux_Register_WD_selector,
        Load_Size_OutUp,
-       ALUOut_Out,
+       ULAOut_Out,
        Low_Out,
        High_Out,
        RegDesloc_Out,
        Sign_Extend1_32_Out,
        Shift_Left16_32_Out,
-       Mux_WD_Registers_Out
+       Mux_Register_WD_Out
        
 
     );
@@ -259,8 +259,8 @@ module cpu (
         Reg_WR,
         RS,
         RT,
-        Mux_WR_Registers_Out,
-        Mux_WD_Registers_Out,
+        Mux_Register_WR_Out,
+        Mux_Register_WD_Out,
         Read_Data1_Out,
         Read_Data2_Out
 
@@ -424,22 +424,22 @@ module cpu (
 
     );
 
-    mux_ALU1 Mux_ALU1_(
+    mux_ULA1 Mux_ULA1_(
 
-        Mux_ALU1_selector,
+        Mux_ULA1_selector,
         PC_Out,
         A_Out,
-        Mux_ALU1_Out
+        Mux_ULA1_Out
 
     );
 
-    mux_ALU2 Mux_ALU2_(
+    mux_ULA2 Mux_ULA2_(
 
-        .seletor(Mux_ALU2_selector),
+        .seletor(Mux_ULA2_selector),
         .Reg_B_info(B_Out),
         .sigEx(Sign_Extend16_32_Out),
         .sigLef(Shift_Left32_32_Out),
-        .mux_ALU2_out(Mux_ALU2_Out)
+        .mux_ULA2_out(Mux_ULA2_Out)
 
     );
 
@@ -451,12 +451,12 @@ module cpu (
 
     );
 
-    ula32 ALU_(
+    ula32 ULA_(
 
-        Mux_ALU1_Out,
-        Mux_ALU2_Out,
-        ALU_selector,
-        ALU_Result,
+        Mux_ULA1_Out,
+        Mux_ULA2_Out,
+        ULA_selector,
+        ULA_Result,
         OVERFLOW,
         NEGATIVE,
         ZERO,
@@ -474,13 +474,13 @@ module cpu (
 
     );
 
-    Registrador ALUOut_(
+    Registrador ULAOut_(
 
         clk,
         reset,
-        ALUOut_Load,
-        ALU_Result,
-        ALUOut_Out
+        ULAOut_Load,
+        ULA_Result,
+        ULAOut_Out
 
     );
 
@@ -488,8 +488,8 @@ module cpu (
 
         Mux_PC_selector,
         EPC_Out,
-        ALU_Result,
-        ALUOut_Out,
+        ULA_Result,
+        ULAOut_Out,
         Concat_28to32_Out,
         Mux_PC_Out
 
@@ -507,7 +507,7 @@ module cpu (
         DivStop,
         DivZero,
 
-        Mux_WD_Memory_selector,
+        Mux_Memory_WD_selector,
         Mux_High_selector,
         Mux_Low_selector,
         Mux_Extend_selector,
@@ -516,13 +516,13 @@ module cpu (
         Mux_Shift_Amt_selector,
 
         Mux_A_selector,              
-        Mux_ALU1_selector,            
-        Mux_ALU2_selector,            
+        Mux_ULA1_selector,            
+        Mux_ULA2_selector,            
         Mux_PC_selector,              
-        Mux_WR_Registers_selector,    
+        Mux_Register_WR_selector,    
 
         Mux_Address_selector,         
-        Mux_WD_Registers_selector,    
+        Mux_Register_WD_selector,    
 
         Address_RG_Load,
         EPC_Load,
@@ -532,7 +532,7 @@ module cpu (
         Low_Load,
         A_Load,
         B_Load,
-        ALUOut_Load,
+        ULAOut_Load,
 
         Store_Size_selector,
         Load_Size_selector,
@@ -543,7 +543,7 @@ module cpu (
         IsBEQ,              
         IsBNE,
 
-        ALU_selector,
+        ULA_selector,
         Shift_selector,
         
         MultInit,

@@ -1,20 +1,20 @@
 module mult (
-    input  wire [31:0] multiplicand,    // Input A
-    input  wire [31:0] multiplier,      // Input B
+    input  wire [31:0] multiplicand,    // Entrada A
+    input  wire [31:0] multiplier,      // Entrada B
     input  wire        clk,
     input  wire        reset,
     input  wire        mult_init,
     
     output wire        mult_stop,
-    output reg  [31:0] hi_out,          // Upper 32 bits of result
-    output reg  [31:0] lo_out           // Lower 32 bits of result
+    output reg  [31:0] hi_out,          // 32 bits superiores do resultado
+    output reg  [31:0] lo_out           // 32 bits inferiores do resultado
 );
-    // Booth's multiplication algorithm registers
-    reg [64:0] accumulator;         // Main accumulator (A + Q + Q-1)
-    reg [64:0] multiplicand_ext;    // Extended multiplicand
-    reg [64:0] complement_2;        // 2's complement of multiplicand
-    reg [5:0]  counter;             // Bit counter
-    reg [31:0] complement_32;       // 32-bit 2's complement
+    // Registradores do algoritmo de multiplicação de Booth
+    reg [64:0] accumulator;         // Acumulador principal (A + Q + Q-1)
+    reg [64:0] multiplicand_ext;    // Multiplicando estendido
+    reg [64:0] complement_2;        // Complemento de 2 do multiplicando
+    reg [5:0]  counter;             // Contador de bits
+    reg [31:0] complement_32;       // Complemento de 2 de 32 bits
     reg        stop_flag, mult_running, finished;
 
     assign mult_stop = stop_flag;
@@ -33,24 +33,24 @@ module mult (
         else begin
             if (mult_init) begin
                 if (mult_running) begin
-                    if (counter < 6'b100000) begin  // 32 iterations
-                        // Booth's algorithm: check last two bits
+                    if (counter < 6'b100000) begin  // 32 iterações
+                        // Algoritmo de Booth: verifica os dois últimos bits
                         if (accumulator[1] != accumulator[0]) begin
-                            if (accumulator[0] == 0) begin  // Subtraction
+                            if (accumulator[0] == 0) begin  // Subtração
                                 accumulator = accumulator + complement_2;
                             end
-                            else begin  // Addition
+                            else begin  // Adição
                                 accumulator = accumulator + multiplicand_ext;
                             end
                         end
-                        // Arithmetic right shift
+                        // Deslocamento aritmético à direita
                         accumulator = accumulator >>> 1;
-                        if (accumulator[63] == 1) begin  // Sign extension
+                        if (accumulator[63] == 1) begin  // Extensão de sinal
                             accumulator[64] = 1'b1;
                         end
                         counter <= counter + 1;
                     end
-                    else begin  // Multiplication complete
+                    else begin  // Multiplicação completa
                         hi_out = accumulator[64:33];
                         lo_out = accumulator[32:1];
                         mult_running = 0;
@@ -60,7 +60,7 @@ module mult (
                 end
                 else begin
                     if (finished == 0) begin
-                        // Initialize multiplication
+                        // Inicializa multiplicação
                         accumulator = {32'b0, multiplier, 1'b0};
                         multiplicand_ext = {multiplicand[31:0], 33'b0};
                         complement_32 = ~multiplicand + 32'b00000000000000000000000000000001;

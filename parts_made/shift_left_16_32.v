@@ -3,7 +3,7 @@ module shift_left_16_32 (
     output wire [31:0] data_out
 );
 
-    // Shift left by 16 positions (load upper immediate)
+    // Desloca à esquerda 16 posições (carrega imediato superior)
     assign data_out = data_in << 16;
 
 endmodule

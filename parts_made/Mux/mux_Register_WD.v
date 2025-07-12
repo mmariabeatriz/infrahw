@@ -1,7 +1,7 @@
-module mux_WD_Registers(
+module mux_Register_WD(
 
     input  wire [2:0]  seletor,
-    input  wire [31:0] aluout_data,     // ALUOut_Out
+    input  wire [31:0] ulaout_data,     // ULAOut_Out
     input  wire [31:0] memory_data,     // Memory_Out
     input  wire [31:0] mdr_data,        // MDR_Out
     input  wire [31:0] hi_data,         // HI_Out
@@ -14,7 +14,7 @@ module mux_WD_Registers(
     always @(*) begin
         case (seletor)
             3'b000: mux_wd_reg_out = 32'd227;        // Constante 227
-            3'b001: mux_wd_reg_out = aluout_data;    // ALUOut_Out
+            3'b001: mux_wd_reg_out = ulaout_data;    // ULAOut_Out
             3'b010: mux_wd_reg_out = memory_data;    // Memory_Out
             3'b011: mux_wd_reg_out = mdr_data;       // MDR_Out
             3'b100: mux_wd_reg_out = hi_data;        // HI_Out

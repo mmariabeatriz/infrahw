@@ -6,13 +6,13 @@ module div (
     input  wire        div_stop,
     input  wire        reset,
     output wire        div_zero,
-    output wire [31:0] hi_out,       // remainder
-    output wire [31:0] lo_out        // quotient
+    output wire [31:0] hi_out,       // resto
+    output wire [31:0] lo_out        // quociente
 );
-    // Division algorithm:
-    // Shift divisor right and compare with current dividend
-    // If divisor is larger, shift 0 as next quotient bit
-    // If divisor is smaller, subtract and shift 1 as next quotient bit
+    // Algoritmo de divisão:
+    // Desloca o divisor para a direita e compara com o dividendo atual
+    // Se o divisor for maior, desloca 0 como próximo bit do quociente
+    // Se o divisor for menor, subtrai e desloca 1 como próximo bit do quociente
     
     reg        div_running, finished, stop_flag, error_div_zero;
     reg [31:0] remainder, divisor_reg;
@@ -44,7 +44,7 @@ module div (
         end
         else if (div_init) begin
             if (div_running) begin
-                if (current_bit != 6'b111111) begin  // -1 (all bits processed)
+                if (current_bit != 6'b111111) begin  // -1 (todos os bits processados)
                     remainder = {remainder[30:0], dividend_reg[current_bit]};
                     if (remainder >= divisor_reg) begin
                         remainder = remainder - divisor_reg;
