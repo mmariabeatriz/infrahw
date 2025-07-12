@@ -1,4 +1,4 @@
-module mux_PC(
+module mux_PC_Src(
 
     input  wire [1:0] seletor,
     input  wire [31:0] epc_data,        // EPC_Out

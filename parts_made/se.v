@@ -1,4 +1,4 @@
-module sign_extend (
+module se (
     input  wire [15:0] data_in,
     output wire [31:0] data_out
 );

@@ -1,4 +1,4 @@
-module load_size(
+module ls(
 
      input  wire [1:0] command,
      input  wire [31:0] mdr,

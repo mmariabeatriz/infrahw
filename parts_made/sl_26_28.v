@@ -1,4 +1,4 @@
-module shift_left26_28 (
+module sl_26_28 (
     input  wire [25:0] data_in,
     output wire [27:0] data_out
 );

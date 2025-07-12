@@ -1,4 +1,4 @@
-module shift_left32_32 (
+module sl_32_32 (
     input  wire [31:0] data_in,
     output wire [31:0] data_out
 );

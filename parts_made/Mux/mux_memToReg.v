@@ -1,4 +1,4 @@
-module mux_WD_Registers(
+module mux_memToReg(
 
     input  wire [2:0]  seletor,
     input  wire [31:0] aluout_data,     // ALUOut_Out

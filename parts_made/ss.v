@@ -1,4 +1,4 @@
-module store_size (
+module ss (
     
     input  wire        command,
     input  wire [31:0] mdr,
@@ -16,4 +16,4 @@ always @ (*) begin
         end
     end
 
-endmodule 
+endmodule

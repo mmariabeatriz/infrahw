@@ -1,4 +1,4 @@
-module mux_WR_Registers(
+module mux_regDst(
 
     input  wire [1:0]  seletor,
     input  wire [4:0]  rt_field,        // instruction[20:16]

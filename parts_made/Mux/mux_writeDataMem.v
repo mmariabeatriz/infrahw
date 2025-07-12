@@ -1,4 +1,4 @@
-module mux_WD_Memory(
+module mux_writeDataMem(
 
     input  wire        seletor,
     input  wire [31:0] reg_B_data,     // B_Out

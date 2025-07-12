@@ -112,10 +112,10 @@ module cpu (
     wire [31:0]     Mult_Low_Out;
     wire [31:0]     Div_Low_Out;
     wire [31:0]     Sign_Extend16_32_Out;
-    wire [31:0]     Shift_Left32_32_Out;
-    wire [27:0]     Shift_Left26_28_Out;
+    wire [31:0]     Sl_32_32_Out;
+    wire [27:0]     Sl_26_28_Out;
     wire [31:0]     ALU_Result;
-    wire [31:0]     Shift_Left16_32_Out;
+    wire [31:0]     Sl_16_32_Out;
 
     Registrador PC_(
         clk,
@@ -125,21 +125,21 @@ module cpu (
         PC_Out
     );
 
-    mux_Address mux_address_(
+    mux_IorD mux_address_(
         Mux_Address_selector,
         PC_Out,
         ALUOut_Out,
         Mux_Address_Out
     );
 
-    mux_WD_Memory mux_wd_MEM_(
+    mux_writeDataMem mux_wd_MEM_(
         Mux_WD_Memory_selector,
         B_Out,
         Store_Size_Out,
         Mux_WD_Memory_Out
     );
 
-    store_size store_size_(
+    ss store_size_(
         Store_Size_selector,
         MDR_Out,
         B_Out,
@@ -190,7 +190,7 @@ module cpu (
     );
 
 
-    load_size load_size_(
+    ls load_size_(
 
         Load_Size_selector,
         MDR_Out,
@@ -207,7 +207,7 @@ module cpu (
 
     );
 
-    mux_WR_Registers mux_wr_reg_(
+    mux_regDst mux_wr_reg_(
        
        Mux_WR_Registers_selector,
        RT,
@@ -216,7 +216,7 @@ module cpu (
 
     );
 
-    mux_WD_Registers mux_wd_reg_(
+    mux_memToReg mux_wd_reg_(
 
        Mux_WD_Registers_selector,
        Load_Size_OutUp,
@@ -225,7 +225,7 @@ module cpu (
        High_Out,
        RegDesloc_Out,
        Sign_Extend1_32_Out,
-       Shift_Left16_32_Out,
+       Sl_16_32_Out,
        Mux_WD_Registers_Out
        
 
@@ -293,10 +293,10 @@ module cpu (
 
     );
 
-    shift_left_16_32 shift_left_16_32_(
+    sl_16_32 sl_16_32_(
 
         IMMEDIATE,
-        Shift_Left16_32_Out
+        Sl_16_32_Out
 
     );
     controller controller_(
@@ -366,7 +366,7 @@ module cpu (
 
     );
 
-    sign_extend sign_extend_(
+    se sign_extend_(
 
         Mux_Extend_Out,
         Sign_Extend16_32_Out
@@ -410,21 +410,21 @@ module cpu (
         Mux_Shift_Amt_Out
     );
 
-    shift_left32_32 shift_left32_32_(
+    sl_32_32 sl_32_32_(
 
         Sign_Extend16_32_Out,
-        Shift_Left32_32_Out
+        Sl_32_32_Out
 
     );
 
-    shift_left26_28 shift_left26_28_(
+    sl_26_28 sl_26_28_(
 
         Concat_26to28_Out,
-        Shift_Left26_28_Out
+        Sl_26_28_Out
 
     );
 
-    mux_ALU1 Mux_ALU1_(
+    mux_ALUSrcA Mux_ALU1_(
 
         Mux_ALU1_selector,
         PC_Out,
@@ -433,20 +433,20 @@ module cpu (
 
     );
 
-    mux_ALU2 Mux_ALU2_(
+    mux_ALUSrcB Mux_ALU2_(
 
         .seletor(Mux_ALU2_selector),
         .Reg_B_info(B_Out),
         .sigEx(Sign_Extend16_32_Out),
-        .sigLef(Shift_Left32_32_Out),
-        .mux_ALU2_out(Mux_ALU2_Out)
+        .sigLef(Sl_32_32_Out),
+        .mux_alusrcb_out(Mux_ALU2_Out)
 
     );
 
     concat_28to32 concat_28to32_(
 
         .PC_out(PC_Out),
-        .SL_out(Shift_Left26_28_Out),
+        .SL_out(Sl_26_28_Out),
         .conc_out(Concat_28to32_Out)
 
     );
@@ -467,7 +467,7 @@ module cpu (
     );
 
 
-    sign_extend1_32 sign_extend1_32_(
+    se_1_32 sign_extend1_32_(
 
         LESS,
         Sign_Extend1_32_Out
@@ -484,7 +484,7 @@ module cpu (
 
     );
 
-    mux_PC mux_PC_(
+    mux_PC_Src mux_PC_(
 
         Mux_PC_selector,
         EPC_Out,
