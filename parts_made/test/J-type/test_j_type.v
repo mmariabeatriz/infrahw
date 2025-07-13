@@ -4,96 +4,70 @@
 module test_j_type;
     // Sinais de entrada
     reg clk;
-    reg reset_in;
-    reg [5:0] opcode;
-    reg [15:0] immediate;
+    reg reset;
+    reg [31:0] instruction;
+    reg zero_flag;
     reg overflow;
-    reg zero_div;
-    reg mult_stop;
-    reg div_stop;
     reg div_zero;
     
     // Sinais de saída
-    wire [1:0] mux_wd_memory;
-    wire mux_high;
-    wire mux_low;
-    wire mux_extend;
-    wire [1:0] mux_b;
-    wire mux_shift_src;
-    wire mux_shift_amt;
-    wire [1:0] mux_a;
-    wire [1:0] mux_alu1;
-    wire [1:0] mux_alu2;
-    wire [1:0] mux_pc;
-    wire [1:0] mux_wr_registers;
-    wire mux_address;
-    wire [1:0] mux_wd_registers;
-    wire address_rg_load;
-    wire epc_load;
-    wire mdr_load;
-    wire ir_load;
-    wire high_load;
-    wire low_load;
-    wire a_load;
-    wire b_load;
-    wire alu_out_load;
-    wire [1:0] store_size;
-    wire [1:0] load_size;
-    wire memory_wr;
-    wire reg_wr;
-    wire pc_write;
-    wire is_beq;
-    wire is_bne;
-    wire [2:0] ula;
-    wire [1:0] shift;
-    wire mult_init;
-    wire div_init;
+    wire [4:0] current_state;
+    wire [5:0] opcode;
+    wire [4:0] rs, rt, rd;
+    wire [4:0] shamt;
+    wire [5:0] funct;
+    wire [15:0] immediate;
+    wire [25:0] address;
+    wire [3:0] alu_control;
+    wire alu_zero, alu_overflow;
+    wire reg_dst, jump, branch, mem_read, mem_to_reg;
+    wire [1:0] alu_op;
+    wire mem_write, alu_src, reg_write;
+    wire pc_write, pc_write_cond;
+    wire [1:0] pc_source;
     
     // Instanciação do módulo control_unit
     control_unit uut (
         .clk(clk),
-        .reset_in(reset_in),
-        .opcode(opcode),
-        .immediate(immediate),
+        .reset(reset),
+        .instruction(instruction),
+        .zero_flag(zero_flag),
         .overflow(overflow),
-        .zero_div(zero_div),
-        .mult_stop(mult_stop),
-        .div_stop(div_stop),
         .div_zero(div_zero),
-        .mux_wd_memory(mux_wd_memory),
-        .mux_high(mux_high),
-        .mux_low(mux_low),
-        .mux_extend(mux_extend),
-        .mux_b(mux_b),
-        .mux_shift_src(mux_shift_src),
-        .mux_shift_amt(mux_shift_amt),
-        .mux_a(mux_a),
-        .mux_alu1(mux_alu1),
-        .mux_alu2(mux_alu2),
-        .mux_pc(mux_pc),
-        .mux_wr_registers(mux_wr_registers),
-        .mux_address(mux_address),
-        .mux_wd_registers(mux_wd_registers),
-        .address_rg_load(address_rg_load),
-        .epc_load(epc_load),
-        .mdr_load(mdr_load),
-        .ir_load(ir_load),
-        .high_load(high_load),
-        .low_load(low_load),
-        .a_load(a_load),
-        .b_load(b_load),
-        .alu_out_load(alu_out_load),
-        .store_size(store_size),
-        .load_size(load_size),
-        .memory_wr(memory_wr),
-        .reg_wr(reg_wr),
+        
+        // Instruction fields (outputs)
+        .opcode(opcode),
+        .rs(rs),
+        .rt(rt),
+        .rd(rd),
+        .shamt(shamt),
+        .funct(funct),
+        .immediate(immediate),
+        .address(address),
+        
+        // ALU controls
+        .alu_control(alu_control),
+        .alu_zero(alu_zero),
+        .alu_overflow(alu_overflow),
+        
+        // Control signals
+        .reg_dst(reg_dst),
+        .jump(jump),
+        .branch(branch),
+        .mem_read(mem_read),
+        .mem_to_reg(mem_to_reg),
+        .alu_op(alu_op),
+        .mem_write(mem_write),
+        .alu_src(alu_src),
+        .reg_write(reg_write),
+        
+        // PC controls
         .pc_write(pc_write),
-        .is_beq(is_beq),
-        .is_bne(is_bne),
-        .ula(ula),
-        .shift(shift),
-        .mult_init(mult_init),
-        .div_init(div_init)
+        .pc_write_cond(pc_write_cond),
+        .pc_source(pc_source),
+        
+        // State output
+        .current_state(current_state)
     );
     
     // Clock
@@ -105,16 +79,13 @@ module test_j_type;
     // Task para reset do sistema
     task reset_system;
         begin
-            reset_in = 1;
-            opcode = 6'h00;
-            immediate = 16'h0000;
+            reset = 1;
+            instruction = 32'h00000000;
+            zero_flag = 0;
             overflow = 0;
-            zero_div = 0;
-            mult_stop = 0;
-            div_stop = 0;
             div_zero = 0;
             #20;
-            reset_in = 0;
+            reset = 0;
             #10;
         end
     endtask
@@ -132,8 +103,7 @@ module test_j_type;
         input [5:0] op;
         input [25:0] target_address;
         begin
-            opcode = op;
-            immediate = target_address[15:0]; // Parte baixa do endereço
+            instruction = {op, target_address};
             wait_cycles(2); // FETCH -> DECODE (J-type executa no DECODE)
             
             $display("=== Instrução J-type para endereço 0x%h ===", target_address);
@@ -147,12 +117,12 @@ module test_j_type;
         begin
             $display("Sinais de Controle:");
             $display("  PC Write: %b", pc_write);
-            $display("  MUX PC: %b", mux_pc);
-            $display("  Register Write: %b", reg_wr);
-            $display("  MUX WR Registers: %b", mux_wr_registers);
-            $display("  MUX WD Registers: %b", mux_wd_registers);
-            $display("  Memory Write: %b", memory_wr);
-            $display("  ULA Control: %b", ula);
+            $display("  PC Source: %b", pc_source);
+            $display("  Register Write: %b", reg_write);
+            $display("  Jump: %b", jump);
+            $display("  Memory Write: %b", mem_write);
+            $display("  ALU Control: %b", alu_control);
+            $display("  Current State: %d", current_state);
         end
     endtask
     

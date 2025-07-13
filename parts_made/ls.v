@@ -1,25 +1,22 @@
+// Unidade de LS (Load Size)
+// Entrada:
+// RegMDROut(32 bits): valor obtido da memória
+// LSControl(2 bits): seleção de como irá ser salvo o valor no banco de registradores
+// Saída: LSControlOut(32 bits): valor a ser armazenado no banco de registradores
+
 module ls(
-
-     input  wire [1:0] command,
-     input  wire [31:0] mdr,
-     output wire [15:0] data_out2, //para baixo (mux extend) (mux_wd_registers)
-     output reg [31:0] data_out //para cima (mux_wd_registers)
-
+    input  wire [1:0] LSControl,        // Seleção: 00=byte, 01=halfword, 10=word
+    input  wire [31:0] RegMDROut,       // Valor obtido da memória
+    output reg  [31:0] LSControlOut     // Valor a ser armazenado no banco de registradores
 );
-   
-   assign data_out2 = {{8{1'b0}}, mdr[31:24]};
 
-   always @ (*) begin
-
-        if (command == 2'b10) begin //load word
-            data_out = mdr;
-        end
-        else if (command == 2'b00) begin //load byte
-            data_out = {24'd0, mdr[7:0]};
-        end
-        else if (command == 2'b01) begin //load halfword
-            data_out = {16'd0, mdr[15:0]};
-        end
+    always @(*) begin
+        case (LSControl)
+            2'b00: LSControlOut = {24'b0, RegMDROut[7:0]};   // Load byte - 1 byte, resto com 0
+            2'b01: LSControlOut = {16'b0, RegMDROut[15:0]};  // Load halfword - 2 bytes, resto com 0
+            2'b10: LSControlOut = RegMDROut;                 // Load word - 4 bytes completos
+            default: LSControlOut = 32'b0;                   // Caso padrão
+        endcase
     end
 
 endmodule

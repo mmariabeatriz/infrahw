@@ -8,15 +8,6 @@ module mux_ALUSrcB (
 
 );
 
-/*
-
-data_0 --|
-4 -------|--out1-------|\
-data_2 --|               |--data_out--->
-data_3 --|--out2-------|/
-
-*/
-
     always @(*) begin
         case (seletor)
             2'b00: mux_alusrcb_out = Reg_B_info;  // B_Out

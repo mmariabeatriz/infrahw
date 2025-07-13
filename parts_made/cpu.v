@@ -21,6 +21,30 @@ module cpu (
     wire[2:0]       Mux_Address_selector;  
     wire[2:0]       Mux_WD_Registers_selector;
 
+    // Control Unit Output Wires
+    wire [5:0]      control_opcode;
+    wire [4:0]      control_rs;
+    wire [4:0]      control_rt;
+    wire [4:0]      control_rd;
+    wire [4:0]      control_shamt;
+    wire [5:0]      control_funct;
+    wire [15:0]     control_immediate;
+    wire [25:0]     control_address;
+    wire [3:0]      control_alu_control;
+    wire            control_alu_zero;
+    wire            control_alu_overflow;
+    wire            control_reg_dst;
+    wire            control_jump;
+    wire            control_branch;
+    wire            control_mem_read;
+    wire            control_mem_to_reg;
+    wire [3:0]      control_alu_op;
+    wire            control_alu_src;
+    wire            control_reg_write;
+    wire            control_pc_write_cond;
+    wire [1:0]      control_pc_source;
+    wire [1:0]      control_shift_amt_selector;
+
     //Control Wires  (Registers)
     wire            PC_Load;
     wire            Address_RG_Load;
@@ -40,7 +64,7 @@ module cpu (
 
 
     //Control Wires  (Outros)
-    wire            Store_Size_selector;
+    wire [1:0]      Store_Size_selector;  // Atualizado para 2 bits
     wire [1:0]      Load_Size_selector;
     wire [2:0]      ALU_selector;
     wire [2:0]      Shift_selector;
@@ -99,7 +123,6 @@ module cpu (
     wire [4:0]      RS;
     wire [4:0]      RT;
     wire [15:0]     IMMEDIATE;
-    wire [15:0]     Load_Size_OutDown;
     wire [31:0]     Load_Size_OutUp;
     wire [31:0]     Concat_28to32_Out;
     wire [25:0]     Concat_26to28_Out;
@@ -140,10 +163,10 @@ module cpu (
     );
 
     ss store_size_(
-        Store_Size_selector,
-        MDR_Out,
-        B_Out,
-        Store_Size_Out
+        .RegSSControl(Store_Size_selector), // Agora usando 2 bits diretamente
+        .RegBOut(B_Out),
+        .RegMDROut(MDR_Out),
+        .SSControlOut(Store_Size_Out)
     );
 
     Registrador address_RG_(
@@ -191,11 +214,9 @@ module cpu (
 
 
     ls load_size_(
-
-        Load_Size_selector,
-        MDR_Out,
-        Load_Size_OutDown,
-        Load_Size_OutUp
+        .LSControl(Load_Size_selector),
+        .RegMDROut(MDR_Out),
+        .LSControlOut(Load_Size_OutUp)
     );
 
     concat_26to28 concat_26to28_(
@@ -285,12 +306,10 @@ module cpu (
     );
 
     mux_Extend mux_extend_(
-
-        Mux_Extend_selector,
-        Load_Size_OutDown,
-        IMMEDIATE,
-        Mux_Extend_Out
-
+        .seletor(Mux_Extend_selector),
+        .load_size_data(IMMEDIATE), // Usando IMMEDIATE diretamente já que LS não produz mais sinal de 16 bits
+        .immediate_data(IMMEDIATE),
+        .mux_extend_out(Mux_Extend_Out)
     );
 
     sl_16_32 sl_16_32_(
@@ -342,28 +361,27 @@ module cpu (
     );
 
     mult mult_(   
-        A_Out,
-        B_Out,
-        clk,
-        reset,
-        MultInit,
-        MultStop,
-        Mult_High_Out,
-        Mult_Low_Out
+        .RegAOut(A_Out),
+        .RegBOut(B_Out),
+        .clk(clk),
+        .reset(reset),
+        .MultCtrl(MultInit),
+        .MultDone(MultStop),
+        .HI(Mult_High_Out),
+        .LO(Mult_Low_Out)
     );
         
 
     div div_(
-        A_Out,
-        B_Out,
-        clk,
-        DivInit,
-        DivStop,
-        reset,
-        DivZero,
-        Div_High_Out,
-        Div_Low_Out
-
+        .RegAOut(A_Out),
+        .RegBOut(B_Out),
+        .clk(clk),
+        .reset(reset),
+        .DivCtrl(DivInit),
+        .DivDone(DivStop),
+        .Div0(DivZero),
+        .HI(Div_High_Out),
+        .LO(Div_Low_Out)
     );
 
     se sign_extend_(
@@ -407,6 +425,7 @@ module cpu (
         B_Out,
         IMMEDIATE,
         MDR_Out,
+        control_shamt,
         Mux_Shift_Amt_Out
     );
 
@@ -496,59 +515,58 @@ module cpu (
     );
 
     control_unit unid_control_(
-
-        clk,
-        reset,
-        OPCODE,
-        IMMEDIATE,
-        OVERFLOW,
-        Zero_Div,
-        MultStop,
-        DivStop,
-        DivZero,
-
-        Mux_WD_Memory_selector,
-        Mux_High_selector,
-        Mux_Low_selector,
-        Mux_Extend_selector,
-        Mux_B_selector,
-        Mux_Shift_Src_selector,
-        Mux_Shift_Amt_selector,
-
-        Mux_A_selector,              
-        Mux_ALU1_selector,            
-        Mux_ALU2_selector,            
-        Mux_PC_selector,              
-        Mux_WR_Registers_selector,    
-
-        Mux_Address_selector,         
-        Mux_WD_Registers_selector,    
-
-        Address_RG_Load,
-        EPC_Load,
-        MDR_Load,
-        IR_Load,
-        High_Load,
-        Low_Load,
-        A_Load,
-        B_Load,
-        ALUOut_Load,
-
-        Store_Size_selector,
-        Load_Size_selector,
-        Memory_WR,
-        Reg_WR,
-
-        PCWrite,
-        IsBEQ,              
-        IsBNE,
-
-        ALU_selector,
-        Shift_selector,
+        .clk(clk),
+        .reset(reset),
+        .instruction(IR_Out), // Use complete instruction from IR
+        .zero_flag(ZERO),
+        .overflow(OVERFLOW),
+        .div_zero(DivZero),
         
-        MultInit,
-
-        DivInit
+        // Instruction fields (outputs)
+        .opcode(control_opcode),
+        .rs(control_rs),
+        .rt(control_rt),
+        .rd(control_rd),
+        .shamt(control_shamt),
+        .funct(control_funct),
+        .immediate(control_immediate),
+        .address(control_address),
+        
+        // ALU controls
+        .alu_control(control_alu_control),
+        .alu_zero(control_alu_zero),
+        .alu_overflow(control_alu_overflow),
+        
+        // Control signals
+        .reg_dst(control_reg_dst),
+        .jump(control_jump),
+        .branch(control_branch),
+        .mem_read(control_mem_read),
+        .mem_to_reg(control_mem_to_reg),
+        .alu_op(control_alu_op),
+        .mem_write(Memory_WR),
+        .alu_src(control_alu_src),
+        .reg_write(control_reg_write),
+        
+        // Load/Store size controls
+        .load_size_control(Load_Size_selector),
+        .store_size_control(Store_Size_selector),
+        
+        // PC controls
+        .pc_write(PCWrite),
+        .pc_write_cond(control_pc_write_cond),
+        .pc_source(control_pc_source),
+        
+        // Shift amount control
+        .shift_amt_selector(control_shift_amt_selector),
+        
+        // State output
+        .current_state()
     );
+
+    // Connect control signals to actual control wires
+    assign ALU_selector = control_alu_control[2:0];
+    assign Reg_WR = control_reg_write;
+    assign Mux_Shift_Amt_selector = control_shift_amt_selector;
 
 endmodule

@@ -1,78 +1,80 @@
 module mult (
-    input  wire [31:0] multiplicand,    // Input A
-    input  wire [31:0] multiplier,      // Input B
+    input  wire [31:0] RegAOut,         // Recebe RS
+    input  wire [31:0] RegBOut,         // Recebe RT
     input  wire        clk,
     input  wire        reset,
-    input  wire        mult_init,
+    input  wire        MultCtrl,        // Início da multiplicação
     
-    output wire        mult_stop,
-    output reg  [31:0] hi_out,          // Upper 32 bits of result
-    output reg  [31:0] lo_out           // Lower 32 bits of result
+    output reg         MultDone,        // Fim do MULT
+    output reg  [31:0] HI,              // Armazena os 32 bits mais significativos
+    output reg  [31:0] LO               // Armazena os 32 bits menos significativos
 );
-    // Booth's multiplication algorithm registers
-    reg [64:0] accumulator;         // Main accumulator (A + Q + Q-1)
-    reg [64:0] multiplicand_ext;    // Extended multiplicand
-    reg [64:0] complement_2;        // 2's complement of multiplicand
-    reg [5:0]  counter;             // Bit counter
-    reg [31:0] complement_32;       // 32-bit 2's complement
-    reg        stop_flag, mult_running, finished;
-
-    assign mult_stop = stop_flag;
+    // Registradores internos conforme especificação
+    reg        Initialize;
+    reg [6:0]  Counter;
+    reg [64:0] A_Multiplicand_ComparePos;    // Registrador p/ SRA
+    reg [64:0] Multiplier;                   // Recebe o multiplicador de RT
+    reg [31:0] NegativeBTemp;                // Armazena o multiplicador negativo
+    reg [64:0] Temp;                         // Recebe NegativeBTemp com 65 bits
+    reg        mult_active;                  // Indica se multiplicação está ativa
     
-    always @(posedge clk) begin
+    always @(posedge clk or posedge reset) begin
         if (reset) begin
-            accumulator      = 65'b0;
-            multiplicand_ext = 65'b0;
-            complement_2     = 65'b0;
-            counter          = 6'b0;
-            complement_32    = 32'b0;
-            mult_running     = 1'b0;
-            finished         = 1'b0;
-            stop_flag        = 0;
+            // Reset de todos os registradores
+            HI <= 32'b0;
+            LO <= 32'b0;
+            MultDone <= 1'b0;
+            Initialize <= 1'b1;
+            Counter <= 7'b0;
+            A_Multiplicand_ComparePos <= 65'b0;
+            Multiplier <= 65'b0;
+            NegativeBTemp <= 32'b0;
+            Temp <= 65'b0;
+            mult_active <= 1'b0;
         end
-        else begin
-            if (mult_init) begin
-                if (mult_running) begin
-                    if (counter < 6'b100000) begin  // 32 iterations
-                        // Booth's algorithm: check last two bits
-                        if (accumulator[1] != accumulator[0]) begin
-                            if (accumulator[0] == 0) begin  // Subtraction
-                                accumulator = accumulator + complement_2;
-                            end
-                            else begin  // Addition
-                                accumulator = accumulator + multiplicand_ext;
-                            end
-                        end
-                        // Arithmetic right shift
-                        accumulator = accumulator >>> 1;
-                        if (accumulator[63] == 1) begin  // Sign extension
-                            accumulator[64] = 1'b1;
-                        end
-                        counter <= counter + 1;
-                    end
-                    else begin  // Multiplication complete
-                        hi_out = accumulator[64:33];
-                        lo_out = accumulator[32:1];
-                        mult_running = 0;
-                        finished = 1;
-                        stop_flag = 1;
-                    end
+        else if (MultCtrl && Initialize) begin
+            // Primeiro ciclo: inicialização dos registradores internos
+            Initialize <= 1'b0;
+            mult_active <= 1'b1;
+            MultDone <= 1'b0;
+            Counter <= 7'b0;
+            
+            // Inicializar registradores conforme algoritmo de Booth correto
+            A_Multiplicand_ComparePos[64:33] <= 32'b0;              // Registrador A inicializado com 0
+            A_Multiplicand_ComparePos[32:1] <= RegBOut;             // Multiplicador de RT
+            A_Multiplicand_ComparePos[0] <= 1'b0;                   // Bit extra para comparação
+            
+            Multiplier <= {33'b0, RegAOut};                        // Multiplicando de RS
+            NegativeBTemp <= (~RegAOut) + 32'd1;                   // Multiplicando negativo
+            Temp <= {33'b0, (~RegAOut) + 32'd1};                   // Temp com multiplicando negativo
+        end
+        else if (mult_active) begin
+                if (Counter < 7'd32) begin
+                    // Booth: comparar os dois bits menos significativos
+                     case (A_Multiplicand_ComparePos[1:0])
+                         2'b10: begin
+                             // 10: subtrair multiplicando e fazer shift
+                             A_Multiplicand_ComparePos <= $signed({A_Multiplicand_ComparePos[64:33] - RegAOut, A_Multiplicand_ComparePos[32:0]}) >>> 1;
+                         end
+                         2'b01: begin
+                             // 01: somar multiplicando e fazer shift
+                             A_Multiplicand_ComparePos <= $signed({A_Multiplicand_ComparePos[64:33] + RegAOut, A_Multiplicand_ComparePos[32:0]}) >>> 1;
+                         end
+                         default: begin
+                             // 00 ou 11: apenas fazer shift aritmético
+                             A_Multiplicand_ComparePos <= $signed(A_Multiplicand_ComparePos) >>> 1;
+                         end
+                     endcase
+                    
+                    Counter <= Counter + 1;
                 end
                 else begin
-                    if (finished == 0) begin
-                        // Initialize multiplication
-                        accumulator = {32'b0, multiplier, 1'b0};
-                        multiplicand_ext = {multiplicand[31:0], 33'b0};
-                        complement_32 = ~multiplicand + 32'b00000000000000000000000000000001;
-                        complement_2 = {complement_32, 33'b0};
-                        counter <= 6'b0;
-                        mult_running = 1'b1;
-                    end
-                    else begin
-                        finished = 0;
-                    end
+                    HI <= A_Multiplicand_ComparePos[64:33];
+                    LO <= A_Multiplicand_ComparePos[32:1];
+                    MultDone <= 1'b1;
+                    mult_active <= 1'b0;
+                    Initialize <= 1'b1;
                 end
-            end
         end
     end
 endmodule
