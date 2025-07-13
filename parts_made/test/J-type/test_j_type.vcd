@@ -1,0 +1,652 @@
+$date
+	Sat Jul 12 21:48:36 2025
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1ps
+$end
+$scope module test_j_type $end
+$var wire 3 ! ula [2:0] $end
+$var wire 2 " store_size [1:0] $end
+$var wire 2 # shift [1:0] $end
+$var wire 1 $ reg_wr $end
+$var wire 1 % pc_write $end
+$var wire 2 & mux_wr_registers [1:0] $end
+$var wire 2 ' mux_wd_registers [1:0] $end
+$var wire 2 ( mux_wd_memory [1:0] $end
+$var wire 1 ) mux_shift_src $end
+$var wire 1 * mux_shift_amt $end
+$var wire 2 + mux_pc [1:0] $end
+$var wire 1 , mux_low $end
+$var wire 1 - mux_high $end
+$var wire 1 . mux_extend $end
+$var wire 2 / mux_b [1:0] $end
+$var wire 2 0 mux_alu2 [1:0] $end
+$var wire 2 1 mux_alu1 [1:0] $end
+$var wire 1 2 mux_address $end
+$var wire 2 3 mux_a [1:0] $end
+$var wire 1 4 mult_init $end
+$var wire 1 5 memory_wr $end
+$var wire 1 6 mdr_load $end
+$var wire 1 7 low_load $end
+$var wire 2 8 load_size [1:0] $end
+$var wire 1 9 is_bne $end
+$var wire 1 : is_beq $end
+$var wire 1 ; ir_load $end
+$var wire 1 < high_load $end
+$var wire 1 = epc_load $end
+$var wire 1 > div_init $end
+$var wire 1 ? b_load $end
+$var wire 1 @ alu_out_load $end
+$var wire 1 A address_rg_load $end
+$var wire 1 B a_load $end
+$var reg 1 C clk $end
+$var reg 1 D div_stop $end
+$var reg 1 E div_zero $end
+$var reg 16 F immediate [15:0] $end
+$var reg 1 G mult_stop $end
+$var reg 6 H opcode [5:0] $end
+$var reg 1 I overflow $end
+$var reg 1 J reset_in $end
+$var reg 1 K zero_div $end
+$scope module uut $end
+$var wire 1 C clk $end
+$var wire 1 D div_stop $end
+$var wire 1 E div_zero $end
+$var wire 16 L immediate [15:0] $end
+$var wire 1 G mult_stop $end
+$var wire 6 M opcode [5:0] $end
+$var wire 1 I overflow $end
+$var wire 1 J reset_in $end
+$var wire 1 K zero_div $end
+$var wire 6 N funct [5:0] $end
+$var parameter 6 O FUNCT_ADD $end
+$var parameter 6 P FUNCT_AND $end
+$var parameter 6 Q FUNCT_DIV $end
+$var parameter 6 R FUNCT_JR $end
+$var parameter 6 S FUNCT_MFHI $end
+$var parameter 6 T FUNCT_MFLO $end
+$var parameter 6 U FUNCT_MULT $end
+$var parameter 6 V FUNCT_SLL $end
+$var parameter 6 W FUNCT_SLT $end
+$var parameter 6 X FUNCT_SRA $end
+$var parameter 6 Y FUNCT_SUB $end
+$var parameter 6 Z FUNCT_XCHG $end
+$var parameter 6 [ OP_ADDI $end
+$var parameter 6 \ OP_BEQ $end
+$var parameter 6 ] OP_BNE $end
+$var parameter 6 ^ OP_J $end
+$var parameter 6 _ OP_JAL $end
+$var parameter 6 ` OP_LB $end
+$var parameter 6 a OP_LUI $end
+$var parameter 6 b OP_LW $end
+$var parameter 6 c OP_SB $end
+$var parameter 6 d OP_SLLM $end
+$var parameter 6 e OP_SW $end
+$var parameter 6 f OP_TYPE_R $end
+$var parameter 6 g STATE_ADD $end
+$var parameter 6 h STATE_ADDI $end
+$var parameter 6 i STATE_AND $end
+$var parameter 6 j STATE_BEQ $end
+$var parameter 6 k STATE_BNE $end
+$var parameter 6 l STATE_DECODE $end
+$var parameter 6 m STATE_DIV $end
+$var parameter 6 n STATE_DIV0 $end
+$var parameter 6 o STATE_FETCH $end
+$var parameter 6 p STATE_J $end
+$var parameter 6 q STATE_JAL $end
+$var parameter 6 r STATE_JR $end
+$var parameter 6 s STATE_LB $end
+$var parameter 6 t STATE_LUI $end
+$var parameter 6 u STATE_LW $end
+$var parameter 6 v STATE_MFHI $end
+$var parameter 6 w STATE_MFLO $end
+$var parameter 6 x STATE_MULT $end
+$var parameter 6 y STATE_OPCODE404 $end
+$var parameter 6 z STATE_OVERFLOW $end
+$var parameter 6 { STATE_RESET $end
+$var parameter 6 | STATE_SB $end
+$var parameter 6 } STATE_SLL $end
+$var parameter 6 ~ STATE_SLLM $end
+$var parameter 6 !" STATE_SLT $end
+$var parameter 6 "" STATE_SRA $end
+$var parameter 6 #" STATE_SUB $end
+$var parameter 6 $" STATE_SW $end
+$var parameter 6 %" STATE_XCHG $end
+$var reg 1 B a_load $end
+$var reg 1 A address_rg_load $end
+$var reg 1 @ alu_out_load $end
+$var reg 1 ? b_load $end
+$var reg 5 &" counter [4:0] $end
+$var reg 6 '" current_state [5:0] $end
+$var reg 1 > div_init $end
+$var reg 1 = epc_load $end
+$var reg 1 < high_load $end
+$var reg 1 ; ir_load $end
+$var reg 1 : is_beq $end
+$var reg 1 9 is_bne $end
+$var reg 2 (" load_size [1:0] $end
+$var reg 1 7 low_load $end
+$var reg 1 6 mdr_load $end
+$var reg 1 5 memory_wr $end
+$var reg 1 4 mult_init $end
+$var reg 2 )" mux_a [1:0] $end
+$var reg 3 *" mux_address [2:0] $end
+$var reg 2 +" mux_alu1 [1:0] $end
+$var reg 2 ," mux_alu2 [1:0] $end
+$var reg 1 -" mux_b $end
+$var reg 1 . mux_extend $end
+$var reg 1 - mux_high $end
+$var reg 1 , mux_low $end
+$var reg 2 ." mux_pc [1:0] $end
+$var reg 2 /" mux_shift_amt [1:0] $end
+$var reg 1 ) mux_shift_src $end
+$var reg 1 0" mux_wd_memory $end
+$var reg 3 1" mux_wd_registers [2:0] $end
+$var reg 2 2" mux_wr_registers [1:0] $end
+$var reg 1 % pc_write $end
+$var reg 1 $ reg_wr $end
+$var reg 3 3" shift [2:0] $end
+$var reg 1 4" store_size $end
+$var reg 3 5" ula [2:0] $end
+$scope task clear_control_signals $end
+$upscope $end
+$scope task clear_loads_except_ab $end
+$upscope $end
+$scope task clear_loads_except_aluout $end
+$upscope $end
+$scope task clear_loads_except_ir $end
+$upscope $end
+$scope task clear_other_loads $end
+$upscope $end
+$scope task decode_instruction $end
+$upscope $end
+$scope task handle_add_state $end
+$upscope $end
+$scope task handle_addi_state $end
+$upscope $end
+$scope task handle_and_state $end
+$upscope $end
+$scope task handle_beq_state $end
+$upscope $end
+$scope task handle_bne_state $end
+$upscope $end
+$scope task handle_decode_state $end
+$upscope $end
+$scope task handle_div0_state $end
+$upscope $end
+$scope task handle_div_state $end
+$upscope $end
+$scope task handle_fetch_state $end
+$upscope $end
+$scope task handle_j_state $end
+$upscope $end
+$scope task handle_jal_state $end
+$upscope $end
+$scope task handle_jr_state $end
+$upscope $end
+$scope task handle_lb_state $end
+$upscope $end
+$scope task handle_lui_state $end
+$upscope $end
+$scope task handle_lw_state $end
+$upscope $end
+$scope task handle_mfhi_state $end
+$upscope $end
+$scope task handle_mflo_state $end
+$upscope $end
+$scope task handle_mult_state $end
+$upscope $end
+$scope task handle_opcode404_state $end
+$upscope $end
+$scope task handle_overflow_state $end
+$upscope $end
+$scope task handle_sb_state $end
+$upscope $end
+$scope task handle_sll_state $end
+$upscope $end
+$scope task handle_sllm_state $end
+$upscope $end
+$scope task handle_slt_state $end
+$upscope $end
+$scope task handle_sra_state $end
+$upscope $end
+$scope task handle_sub_state $end
+$upscope $end
+$scope task handle_sw_state $end
+$upscope $end
+$scope task handle_xchg_state $end
+$upscope $end
+$scope task reset_all_signals $end
+$upscope $end
+$upscope $end
+$scope task display_control_signals $end
+$upscope $end
+$scope task execute_j_instruction $end
+$var reg 6 6" op [5:0] $end
+$var reg 26 7" target_address [25:0] $end
+$upscope $end
+$scope task reset_system $end
+$upscope $end
+$scope task wait_cycles $end
+$var integer 32 8" cycles [31:0] $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+$comment Show the parameter values. $end
+$dumpall
+b10010 %"
+b11011 $"
+b10001 #"
+b1111 ""
+b1110 !"
+b10110 ~
+b1101 }
+b11010 |
+b0 {
+b11 z
+b100 y
+b1001 x
+b1100 w
+b1011 v
+b11001 u
+b11000 t
+b10111 s
+b1010 r
+b11111 q
+b11110 p
+b1 o
+b101 n
+b1000 m
+b10 l
+b10101 k
+b10100 j
+b111 i
+b10011 h
+b110 g
+b0 f
+b101011 e
+b1001 d
+b101000 c
+b100011 b
+b1111 a
+b100000 `
+b11 _
+b10 ^
+b101 ]
+b100 \
+b1000 [
+b101 Z
+b100010 Y
+b11 X
+b101010 W
+b0 V
+b11000 U
+b10010 T
+b10000 S
+b1000 R
+b11010 Q
+b100100 P
+b100000 O
+$end
+#0
+$dumpvars
+bx 8"
+bx 7"
+bx 6"
+bx 5"
+x4"
+bx 3"
+bx 2"
+bx 1"
+x0"
+bx /"
+bx ."
+x-"
+bx ,"
+bx +"
+bx *"
+bx )"
+bx ("
+b0 '"
+bx &"
+b0 N
+b0 M
+b0 L
+0K
+1J
+0I
+b0 H
+0G
+b0 F
+0E
+0D
+0C
+xB
+xA
+x@
+x?
+x>
+x=
+x<
+x;
+x:
+x9
+bx 8
+x7
+x6
+x5
+x4
+bx 3
+x2
+bx 1
+bx 0
+b0x /
+x.
+x-
+x,
+bx +
+x*
+x)
+b0x (
+bx '
+bx &
+x%
+x$
+bx #
+b0x "
+bx !
+$end
+#5000
+02
+0*
+b0 #
+b0 '
+b0 &"
+b1 '"
+0>
+04
+b0 8
+b0 ("
+b0 "
+04"
+b0 *"
+b0 +
+b0 ."
+b0 0
+b0 ,"
+b0 1
+b0 +"
+b0 3
+b0 )"
+b0 /"
+0)
+b0 /
+0-"
+0.
+0,
+0-
+b0 (
+00"
+b0 3"
+b0 !
+b0 5"
+09
+0:
+0%
+1$
+05
+0@
+0?
+0B
+07
+0<
+0;
+06
+0=
+0A
+b0 1"
+b1 &
+b1 2"
+1C
+#10000
+0C
+#15000
+1C
+#20000
+0C
+0J
+#25000
+b1 &"
+0$
+1@
+1A
+b1 !
+b1 5"
+b1 0
+b1 ,"
+1C
+#30000
+0C
+b10 8"
+b1000000000000 F
+b1000000000000 L
+b10 H
+b10 M
+b1000000000000 7"
+b10 6"
+#35000
+b10 &"
+1C
+#40000
+0C
+#45000
+b11 &"
+b10000000000000 F
+b10000000000000 L
+b10000000000000 7"
+1C
+#50000
+0C
+#55000
+b0 &"
+b10 '"
+1%
+1;
+0@
+0A
+b10 +
+b10 ."
+1C
+#60000
+0C
+#65000
+b1 &"
+0%
+1@
+0;
+b11 0
+b11 ,"
+1.
+b0 F
+b0 L
+b0 H
+b0 M
+1J
+1C
+#70000
+0C
+#75000
+b0 &"
+b1 '"
+b0 +
+b0 ."
+b0 0
+b0 ,"
+0.
+b0 !
+b0 5"
+1$
+0@
+1C
+#80000
+0C
+#85000
+b1 &"
+0$
+1@
+1A
+b1 !
+b1 5"
+b1 0
+b1 ,"
+1C
+0J
+#90000
+0C
+#95000
+b10 &"
+1C
+b11000000000000 F
+b11000000000000 L
+b11 H
+b11 M
+b11000000000000 7"
+b11 6"
+#100000
+0C
+#105000
+b11 &"
+b100000000000000 F
+b100000000000000 L
+b100000000000000 7"
+1C
+#110000
+0C
+#115000
+b0 &"
+b10 '"
+1%
+1;
+0@
+0A
+b10 +
+b10 ."
+1C
+#120000
+0C
+#125000
+b1 &"
+0%
+1@
+0;
+b11 0
+b11 ,"
+1.
+b0 F
+b0 L
+b0 H
+b0 M
+1J
+1C
+#130000
+0C
+#135000
+b0 &"
+b1 '"
+b0 +
+b0 ."
+b0 0
+b0 ,"
+0.
+b0 !
+b0 5"
+1$
+0@
+1C
+#140000
+0C
+#145000
+b1 &"
+0$
+1@
+1A
+b1 !
+b1 5"
+b1 0
+b1 ,"
+1C
+0J
+#150000
+0C
+#155000
+b10 &"
+1C
+b1000000000000 F
+b1000000000000 L
+b10 H
+b10 M
+#160000
+0C
+#165000
+b11 &"
+b0 F
+b0 L
+b0 H
+b0 M
+1J
+1C
+#170000
+0C
+#175000
+b0 &"
+b0 0
+b0 ,"
+b0 !
+b0 5"
+1$
+0@
+0A
+1C
+#180000
+0C
+#185000
+b1 &"
+0$
+1@
+1A
+b1 !
+b1 5"
+b1 0
+b1 ,"
+1C
+0J
+#190000
+0C
+#195000
+b10 &"
+1C
+b11 8"
+b10000000000000 F
+b10000000000000 L
+b11 H
+b11 M
+#200000
+0C
+#205000
+b11 &"
+1C
+#210000
+0C
+#215000
+b0 &"
+b10 '"
+1%
+1;
+0@
+0A
+b10 +
+b10 ."
+1C
