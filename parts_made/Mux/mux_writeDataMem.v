@@ -6,7 +6,7 @@ module mux_writeDataMem(
     input  wire        seletor,
     input  wire [31:0] reg_B_data,     // B_Out
     input  wire [31:0] store_size_data, // Store_Size_Out
-    output wire [31:0] mux_wd_memory_out
+    output reg [31:0] mux_wd_memory_out
 
 );
 

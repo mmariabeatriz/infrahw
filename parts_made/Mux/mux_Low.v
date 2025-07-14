@@ -6,7 +6,7 @@ module mux_Low(
     input  wire        seletor,
     input  wire [31:0] mult_low_data,   // Mult_Low_Out
     input  wire [31:0] div_low_data,    // Div_Low_Out
-    output wire [31:0] mux_low_out
+    output reg [31:0] mux_low_out
 
 );
 

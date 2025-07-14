@@ -6,7 +6,7 @@ module mux_B(
     input  wire        seletor,
     input  wire [31:0] read_data2,     // Read_Data2_Out
     input  wire [31:0] memory_data,    // Memory_Out
-    output wire [31:0] mux_B_out
+    output reg [31:0] mux_B_out
 
 );
 

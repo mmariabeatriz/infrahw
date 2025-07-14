@@ -8,7 +8,7 @@ module mux_PC_Src(
     input  wire [31:0] alu_result,      // ALU_Result
     input  wire [31:0] aluout_data,     // ALUOut_Out
     input  wire [31:0] concat_data,     // Concat_28to32_Out
-    output wire [31:0] mux_PC_out
+    output reg [31:0] mux_PC_out
 
 );
 

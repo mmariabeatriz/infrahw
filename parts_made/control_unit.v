@@ -26,7 +26,7 @@ module control_unit(
     output reg jump,
     output reg branch,
     output reg mem_read,
-    output reg mem_to_reg,
+    output reg [2:0] mem_to_reg,
     output reg [3:0] alu_op,
     output reg mem_write,
     output reg alu_src,
@@ -43,6 +43,9 @@ module control_unit(
     
     // Shift amount control
     output reg [1:0] shift_amt_selector,
+    
+    // EPC control
+    output reg epc_load,
     
     // State output
     output [4:0] current_state
@@ -180,7 +183,7 @@ module control_unit(
             jump = 1'b0;
             branch = 1'b0;
             mem_read = 1'b0;
-            mem_to_reg = 1'b0;
+            mem_to_reg = 3'b000;
             alu_op = 4'b0000;
             mem_write = 1'b0;
             alu_src = 1'b0;
@@ -197,6 +200,9 @@ module control_unit(
             
             // Shift amount control
             shift_amt_selector = 2'b00;
+            
+            // EPC control
+            epc_load = 1'b0;
             
             // ALU controls
             alu_control = 4'b0000;
@@ -224,8 +230,13 @@ module control_unit(
             pc_write = 1'b1;
             pc_source = 2'b00; // PC + 4
             
-            state = ST_DECODE;
-            counter = 5'b00000;
+            // Aguardar um ciclo antes de ir para DECODE
+            if (counter == 5'b00000) begin
+                counter = counter + 1;
+            end else begin
+                state = ST_DECODE;
+                counter = 5'b00000;
+            end
         end
     endtask
 
@@ -279,6 +290,7 @@ module control_unit(
             alu_op = 4'b0010; // ADD
             alu_control = 4'b0010; // ADD
             reg_write = 1'b1;
+            mem_to_reg = 3'b001; // Use ALU result
             if (overflow) state = ST_OVERFLOW;
             else state = ST_FETCH;
         end
@@ -290,6 +302,7 @@ module control_unit(
             alu_op = 4'b0001; // AND
             alu_control = 4'b0001; // AND
             reg_write = 1'b1;
+            mem_to_reg = 3'b001; // Use ALU result
             state = ST_FETCH;
         end
     endtask
@@ -325,6 +338,7 @@ module control_unit(
             alu_op = 4'b1100; // MFHI
             alu_control = 4'b1100; // MFHI
             reg_write = 1'b1;
+            mem_to_reg = 3'b100; // Use HI register
             state = ST_FETCH;
         end
     endtask
@@ -335,6 +349,7 @@ module control_unit(
             alu_op = 4'b1101; // MFLO
             alu_control = 4'b1101; // MFLO
             reg_write = 1'b1;
+            mem_to_reg = 3'b101; // Use LO register
             state = ST_FETCH;
         end
     endtask
@@ -345,6 +360,7 @@ module control_unit(
             alu_op = 4'b0100; // SLL
             alu_control = 4'b0100; // SLL
             reg_write = 1'b1;
+            mem_to_reg = 3'b110; // Use shift result
             shift_amt_selector = 2'b11; // Use shamt from instruction
             state = ST_FETCH;
         end
@@ -356,6 +372,7 @@ module control_unit(
             alu_op = 4'b0111; // SLT
             alu_control = 4'b0111; // SLT
             reg_write = 1'b1;
+            mem_to_reg = 3'b001; // Use ALU result
             state = ST_FETCH;
         end
     endtask
@@ -366,6 +383,7 @@ module control_unit(
             alu_op = 4'b0101; // SRA
             alu_control = 4'b0101; // SRA
             reg_write = 1'b1;
+            mem_to_reg = 3'b110; // Use shift result
             shift_amt_selector = 2'b11; // Use shamt from instruction
             state = ST_FETCH;
         end
@@ -377,6 +395,7 @@ module control_unit(
             alu_op = 4'b0110; // SUB
             alu_control = 4'b0110; // SUB
             reg_write = 1'b1;
+            mem_to_reg = 3'b001; // Use ALU result
             if (overflow) state = ST_OVERFLOW;
             else state = ST_FETCH;
         end
@@ -388,6 +407,7 @@ module control_unit(
             alu_op = 4'b1011; // XCHG
             alu_control = 4'b1011; // XCHG
             reg_write = 1'b1;
+            mem_to_reg = 3'b001; // Use ALU result
             state = ST_FETCH;
         end
     endtask
@@ -397,7 +417,9 @@ module control_unit(
         begin
             alu_src = 1'b1; // Immediate
             alu_op = 4'b0010; // ADD
+            alu_control = 4'b0010; // ADD
             reg_write = 1'b1;
+            mem_to_reg = 3'b001; // Use ALU result
             if (overflow) state = ST_OVERFLOW;
             else state = ST_FETCH;
         end
@@ -407,6 +429,7 @@ module control_unit(
         begin
             branch = 1'b1;
             alu_op = 4'b0110; // SUB for comparison
+            alu_control = 4'b0110; // SUB
             pc_write_cond = 1'b1;
             pc_source = 2'b01; // Branch target
             state = ST_FETCH;
@@ -417,6 +440,7 @@ module control_unit(
         begin
             branch = 1'b1;
             alu_op = 4'b0110; // SUB for comparison
+            alu_control = 4'b0110; // SUB
             pc_write_cond = 1'b1;
             pc_source = 2'b01; // Branch target
             state = ST_FETCH;
@@ -437,7 +461,7 @@ module control_unit(
             alu_src = 1'b1; // Immediate
             alu_op = 4'b0010; // ADD for address calculation
             mem_read = 1'b1;
-            mem_to_reg = 1'b1;
+            mem_to_reg = 3'b011; // Use MDR
             reg_write = 1'b1;
             load_size_control = 2'b00; // Load byte - 1 byte
             state = ST_FETCH;
@@ -448,20 +472,33 @@ module control_unit(
         begin
             alu_src = 1'b1; // Immediate
             alu_op = 4'b1000; // LUI
+            alu_control = 4'b1000; // LUI
             reg_write = 1'b1;
+            mem_to_reg = 3'b110; // Use shift_data
             state = ST_FETCH;
         end
     endtask
 
     task handle_lw_state;
         begin
-            alu_src = 1'b1; // Immediate
-            alu_op = 4'b0010; // ADD for address calculation
-            mem_read = 1'b1;
-            mem_to_reg = 1'b1;
-            reg_write = 1'b1;
-            load_size_control = 2'b10; // Load word - 4 bytes
-            state = ST_FETCH;
+            if (counter == 5'b00000) begin
+                // Ciclo 1: Calcular endereço
+                alu_src = 1'b1; // Immediate
+                alu_op = 4'b0010; // ADD for address calculation
+                alu_control = 4'b0010; // ADD
+                counter = counter + 1;
+            end else if (counter == 5'b00001) begin
+                // Ciclo 2: Ler da memória
+                mem_read = 1'b1;
+                load_size_control = 2'b10; // Load word - 4 bytes
+                counter = counter + 1;
+            end else begin
+                // Ciclo 3: Escrever no registrador
+                mem_to_reg = 3'b011; // Use memory data (MDR)
+                reg_write = 1'b1;
+                state = ST_FETCH;
+                counter = 5'b00000;
+            end
         end
     endtask
 
@@ -477,11 +514,19 @@ module control_unit(
 
     task handle_sw_state;
         begin
-            alu_src = 1'b1; // Immediate
-            alu_op = 4'b0010; // ADD for address calculation
-            mem_write = 1'b1;
-            store_size_control = 2'b10; // Store word - 4 bytes
-            state = ST_FETCH;
+            if (counter == 5'b00000) begin
+                // Ciclo 1: Calcular endereço
+                alu_src = 1'b1; // Immediate
+                alu_op = 4'b0010; // ADD for address calculation
+                alu_control = 4'b0010; // ADD
+                counter = counter + 1;
+            end else begin
+                // Ciclo 2: Escrever na memória
+                mem_write = 1'b1;
+                store_size_control = 2'b10; // Store word - 4 bytes
+                state = ST_FETCH;
+                counter = 5'b00000;
+            end
         end
     endtask
 
@@ -508,6 +553,7 @@ module control_unit(
     // Exception handling tasks
     task handle_overflow_state;
         begin
+            epc_load = 1'b1;    // Salva PC atual no EPC
             pc_write = 1'b1;
             pc_source = 2'b11; // Exception handler address
             state = ST_FETCH;
@@ -516,6 +562,7 @@ module control_unit(
 
     task handle_opcode404_state;
         begin
+            epc_load = 1'b1;    // Salva PC atual no EPC
             pc_write = 1'b1;
             pc_source = 2'b11; // Exception handler address
             state = ST_FETCH;
@@ -524,6 +571,7 @@ module control_unit(
 
     task handle_div0_state;
         begin
+            epc_load = 1'b1;    // Salva PC atual no EPC
             pc_write = 1'b1;
             pc_source = 2'b11; // Exception handler address
             state = ST_FETCH;

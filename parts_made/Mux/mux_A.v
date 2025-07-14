@@ -7,7 +7,7 @@ module mux_A(
     input  wire [31:0] memory_data,     // Memory_Out
     input  wire [31:0] read_data1,      // Read_Data1_Out
     input  wire [31:0] read_data2,      // Read_Data2_Out
-    output wire [31:0] mux_A_out
+    output reg [31:0] mux_A_out
 
 );
 

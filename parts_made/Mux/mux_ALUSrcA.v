@@ -6,7 +6,7 @@ module mux_ALUSrcA(
     input  wire [1:0] seletor,
     input  wire [31:0] pc_data,         // PC_Out
     input  wire [31:0] reg_A_data,      // A_Out
-    output wire [31:0] mux_alusrca_out
+    output reg [31:0] mux_alusrca_out
 
 );
 

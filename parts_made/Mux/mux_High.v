@@ -6,7 +6,7 @@ module mux_High(
     input  wire        seletor,
     input  wire [31:0] mult_high_data,  // Mult_High_Out
     input  wire [31:0] div_high_data,   // Div_High_Out
-    output wire [31:0] mux_high_out
+    output reg [31:0] mux_high_out
 
 );
 

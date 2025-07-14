@@ -6,7 +6,7 @@ module mux_IorD (
     input  wire [2:0]  seletor,
     input  wire [31:0] alu_result,      // ALU_Result
     input  wire [31:0] aluout_data,     // ALUOut_Out
-    output wire [31:0] mux_iord_out
+    output reg [31:0] mux_iord_out
 
 );
 

@@ -29,6 +29,8 @@ O processador implementa uma versão simplificada da arquitetura MIPS com suport
 - **ULA**: Unidade Lógica e Aritmética de 32 bits
 - **Banco de Registradores**: 32 registradores de 32 bits
 - **Memória**: Memória unificada para instruções e dados
+- **Unidades Aritméticas**: Multiplicação (MULT), Divisão (DIV) com algoritmos especializados
+- **Unidades de Processamento**: Load Size (LS), Store Size (SS), Sign Extend (SE)
 
 ## Instruções Suportadas
 ### Instruções Tipo R
@@ -71,97 +73,187 @@ infrahw/
 │   └── instrucoes.mif    # Arquivo de instruções
 ├── parts_made/           # Componentes implementados
 │   ├── control_unit.v    # Unidade de controle principal
-│   ├── cpu.v             # Top-level do processador
-│   ├── mux/              # Multiplexadores
+│   ├── mult.v            # Unidade de multiplicação (algoritmo de Booth)
+│   ├── div.v             # Unidade de divisão (subtração sucessiva)
+│   ├── ls.v              # Load Size - controle de tamanho de carregamento
+│   ├── ss.v              # Store Size - controle de tamanho de armazenamento
+│   ├── se.v              # Sign Extend - extensão de sinal 16→32 bits
+│   ├── mux/              # Multiplexadores para seleção de dados
 │   ├── test/             # Testes organizados por tipo
-│   │   ├── r-type/       # Testes para instruções R
-│   │   ├── i-type/       # Testes para instruções I
-│   │   ├── j-type/       # Testes para instruções J
-│   │   └── states/       # Testes de estados
+│   │   ├── R-type/       # Testes para instruções R
+│   │   ├── I-type/       # Testes para instruções I
+│   │   ├── J-type/       # Testes para instruções J
+│   │   └── exceptions/   # Testes de exceções
 │   └── *.v               # Outros módulos auxiliares
 └── README.md             # Este arquivo
 ```
 
-## Como Usar
+## Como testar
 ### Pré-requisitos
 - Icarus Verilog (iverilog)
 - GTKWave (para visualização de sinais)
 - Make (opcional)
 
-### Compilação e Simulação
-1. **Navegar para o diretório de testes:**
-   ```bash
-   cd parts_made/test/
-   ```
+### Testes do Processador MIPS Multiciclo
+Este diretório contém os testes especializados para validação completa do processador MIPS.
 
-2. **Executar testes específicos:**
-   ```bash
-   # Teste de instruções R-type
-   cd r-type
-   make
-   ./test_r_type
-   
-   # Teste de instruções I-type
-   cd ../i-type
-   make
-   ./test_i_type
-   
-   # Teste de instruções J-type
-   cd ../j-type
-   make
-   ./test_j_type
-   ```
+#### test_complete_processor.v
+**Testbench completo do processador MIPS**
+- **Localização**: `complete/test_complete_processor.v`
+- **Propósito**: Teste integrado de todas as funcionalidades do processador
+- **Cobertura completa**:
+  - **Instruções R-type**: ADD, SUB, AND, SLT, SLL, SRA, MULT, DIV, MFHI, MFLO, JR
+  - **Instruções I-type**: ADDI, LUI, LW, LB, SW, SB, BEQ, BNE, SLLM
+  - **Instruções J-type**: J, JAL
+  - **Tratamento de exceções**: Overflow, Divisão por Zero, Opcode Inválido
+  - **Módulos auxiliares**: Load Size (ls.v), Store Size (ss.v), Sign Extend (se.v)
+- **Características**:
+  - Testa todos os 27 casos implementados
+  - Instancia todos os módulos do processador
+  - Verifica sinais de controle e transições de estado
+  - Logs detalhados de cada teste
 
-3. **Visualizar sinais:**
-   ```bash
-   gtkwave test_*.vcd
-   ```
-
-### Sinais Importantes para Monitoramento
-- `current_state`: Estado atual da máquina
-- `counter`: Contador de ciclos
-- `pc_write`: Habilitação de escrita no PC
-- `reg_wr`: Habilitação de escrita nos registradores
-- `memory_wr`: Habilitação de escrita na memória
-- `mux_pc`: Seletor do próximo PC
-- `ula`: Código de operação da ULA
-- `opcode`: Código da instrução atual
-
-## Testes
-O projeto inclui uma suíte abrangente de testes:
-
-- **Testes por Tipo de Instrução**: Verificam o funcionamento correto de cada categoria
-- **Testes de Estados**: Validam as transições da máquina de estados
-- **Cobertura**: Todos os tipos de instrução e casos especiais
-
-### Executando Todos os Testes
+#### Como executar os testes
+##### Compilação
 ```bash
-cd parts_made/test/
-
-# Executar todos os testes
-for dir in r-type i-type j-type; do
-    cd $dir
-    make && ./test_${dir//-/_}
-    cd ..
-done
+# Testbench completo (RECOMENDADO)
+cd complete
+iverilog -o test_complete_processor test_complete_processor.v ../control_unit.v ../mult.v ../div.v ../ls.v ../ss.v ../se.v
 ```
 
-## Resultados
-Todos os testes foram executados com sucesso, confirmando:
+##### Execução
+```bash
+# Executar testbench completo (RECOMENDADO)
+vvp test_complete_processor
+```
 
-✅ Funcionamento correto de todas as instruções R-type  
-✅ Funcionamento correto de todas as instruções I-type  
-✅ Funcionamento correto de todas as instruções J-type  
-✅ Transições corretas da máquina de estados  
-✅ Controle adequado dos sinais de datapath  
+##### Análise de sinais (ondas)
+```bash
+# Visualizar com GTKWave
+gtkwave test_complete_processor.vcd
+```
+
+#### Arquivos Gerados
+- **Executável**: `complete/test_complete_processor`
+- **VCD File**: `complete/test_complete_processor.vcd`
+- **Logs**: No terminal durante execução
+
+#### Estrutura dos Testes
+##### Tasks Comuns
+- `reset_system()`: Reinicializa o sistema
+- `wait_cycles(n)`: Aguarda n ciclos de clock
+- `test_*_instruction()`: Testa tipos específicos de instrução
+
+##### Sinais Monitorados
+- **Estados**: `current_state`, `counter`
+- **Controle**: `pc_write_enable`, `instruction_write`, `memory_write`, `register_write`
+- **MUXes**: `mux_a`, `mux_b`, `mux_alu_1`, `mux_alu_2`, `mux_pc`, etc.
+- **ALU**: `alu_control`, `shift_control`
+- **Memória**: `load_size_control`, `store_size_control`
+- **Registradores especiais**: `hi_write`, `lo_write`
+- **Exceções**: `exception_control`
+
+#### Como Criar Novos Testes
+##### 1. Estrutura Básica de um Testbench
+```verilog
+module test_nome;
+    // Declaração de sinais
+    reg clk, reset;
+    wire [31:0] instruction;
+    wire [2:0] current_state;
+    
+    // Instanciação do módulo a ser testado
+    control_unit uut (
+        .clk(clk),
+        .reset(reset),
+        .instruction(instruction),
+        .current_state(current_state)
+        // ... outras conexões
+    );
+    
+    // Geração de clock
+    always #5 clk = ~clk;
+    
+    // Bloco inicial de teste
+    initial begin
+        // Inicialização
+        clk = 0;
+        reset = 1;
+        #10 reset = 0;
+        
+        // Seus testes aqui
+        test_sua_instrucao();
+        
+        // Finalização
+        $finish;
+    end
+    
+    // Tasks para organizar os testes
+    task test_sua_instrucao;
+        begin
+            instruction = 32'h01234567; // Sua instrução
+            #20; // Aguardar ciclos
+            // Verificações
+            if (current_state == 3'b010) begin
+                $display("Teste passou!");
+            end else begin
+                $display("Teste falhou!");
+            end
+        end
+    endtask
+endmodule
+```
+
+##### 2. Passos para Criar um Novo Teste
+1. **Defina o objetivo**: Qual funcionalidade será testada?
+2. **Identifique os módulos**: Quais módulos precisam ser instanciados?
+3. **Declare os sinais**: Entradas (reg) e saídas (wire)
+4. **Instancie os módulos**: Conecte os sinais corretamente
+5. **Implemente os testes**: Use tasks para organizar
+6. **Adicione verificações**: Compare resultados esperados
+7. **Compile e execute**: Verifique se funciona corretamente
+
+##### 3. Boas Práticas
+- Use tasks para organizar diferentes tipos de teste
+- Adicione displays informativos para acompanhar a execução
+- Verifique sempre os sinais de controle relevantes
+- Aguarde ciclos suficientes para a operação completar
+- Use nomes descritivos para sinais e tasks
+- Documente o propósito de cada teste
+
+##### 4. Exemplo de Verificação
+```verilog
+task verificar_resultado;
+    input [31:0] esperado;
+    input [31:0] obtido;
+    input [50*8:1] nome_teste;
+    begin
+        if (esperado == obtido) begin
+            $display("[PASS] %s: %h == %h", nome_teste, esperado, obtido);
+        end else begin
+            $display("[FAIL] %s: esperado %h, obtido %h", nome_teste, esperado, obtido);
+        end
+    end
+endtask
+```
+
+## Compatibilidade
+- Sintaxe Verilog padrão
+- Compatível com Icarus Verilog
+- Geração de VCD para análise visual
+- Testado no Windows com PowerShell
 
 ## Desenvolvimento
 ### Arquivos Principais
 
 - `control_unit.v`: Implementação da máquina de estados principal
-- `cpu.v`: Integração de todos os componentes
-- `mux/*.v`: Multiplexadores para seleção de dados
-- `test/*.v`: Testbenches para validação
+- `mult.v`: Unidade de multiplicação com algoritmo de Booth
+- `div.v`: Unidade de divisão por subtração sucessiva com detecção de divisão por zero
+- `ls.v`: Load Size - processa dados carregados (byte, halfword, word)
+- `ss.v`: Store Size - processa dados armazenados preservando bytes não modificados
+- `se.v`: Sign Extend - extensão de sinal de 16 para 32 bits
+- `mux/*.v`: Multiplexadores para seleção de dados no datapath
+- `test/*.v`: Testbenches para validação de todos os componentes
 
 ## Notas Técnicas
 - A ULA opera com códigos 000 (inicial), 001 (soma) e 010 (subtração)

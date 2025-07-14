@@ -7,7 +7,7 @@ module mux_ALUSrcB (
     input  wire [31:0] Reg_B_info,
     input  wire [31:0] sigEx,
     input  wire [31:0] sigLef,
-    output wire [31:0] mux_alusrcb_out
+    output reg [31:0] mux_alusrcb_out
 
 );
 
@@ -20,6 +20,5 @@ module mux_ALUSrcB (
             default: mux_alusrcb_out = 32'b0;
         endcase
     end
-
 
 endmodule

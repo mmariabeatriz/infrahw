@@ -1,83 +1,111 @@
-// Unidade de Multiplicação (MULT) - Realiza multiplicação de números inteiros com sinal
-// Implementa algoritmo de Booth para multiplicação eficiente
-// Produz resultado de 64 bits: parte alta (HI) e parte baixa (LO)
-module mult (
-    input  wire [31:0] RegAOut,         // Recebe RS
-    input  wire [31:0] RegBOut,         // Recebe RT
-    input  wire        clk,
-    input  wire        reset,
-    input  wire        MultCtrl,        // Início da multiplicação
+`timescale 1ns / 1ps
+
+// Multiplicador com Algoritmo de Booth - VERSÃO CORRIGIDA
+// Realiza multiplicação de dois números de 32 bits com sinal
+// Produz resultado de 64 bits em 32 ciclos
+module mult(
+    input wire clk,
+    input wire [31:0] A,        // Multiplicando (RS)
+    input wire [31:0] B,        // Multiplicador (RT)
+    input wire mult_ctrl,       // Sinal para iniciar multiplicação
     
-    output reg         MultDone,        // Fim do MULT
-    output reg  [31:0] HI,              // Armazena os 32 bits mais significativos
-    output reg  [31:0] LO               // Armazena os 32 bits menos significativos
+    output reg [31:0] HI,       // 32 bits mais significativos
+    output reg [31:0] LO,       // 32 bits menos significativos
+    output reg stop             // Sinal indicando término da multiplicação
 );
-    // Registradores internos conforme especificação
-    reg        Initialize;
-    reg [6:0]  Counter;
-    reg [64:0] A_Multiplicand_ComparePos;    // Registrador p/ SRA
-    reg [64:0] Multiplier;                   // Recebe o multiplicador de RT
-    reg [31:0] NegativeBTemp;                // Armazena o multiplicador negativo
-    reg [64:0] Temp;                         // Recebe NegativeBTemp com 65 bits
-    reg        mult_active;                  // Indica se multiplicação está ativa
+
+    // Estados da máquina de multiplicação
+    parameter IDLE = 2'b00;
+    parameter MULTIPLY = 2'b01;
+    parameter DONE = 2'b10;
     
-    always @(posedge clk or posedge reset) begin
-        if (reset) begin
-            // Reset de todos os registradores
+    // Registradores internos
+    reg [1:0] state;
+    reg [32:0] accumulator;     // Acumulador (33 bits com sinal)
+    reg [31:0] multiplier;      // Multiplicador (Q)
+    reg q_minus1;               // Bit Q-1
+    reg [31:0] multiplicand;    // M (multiplicando)
+    reg [5:0] count;            // Contador de ciclos
+    
+    // Sinais para operações
+    wire [1:0] booth_bits;      // Q0 e Q-1 para decisão
+    wire [32:0] add_result;     // Resultado de accumulator + multiplicand
+    wire [32:0] sub_result;     // Resultado de accumulator - multiplicand
+    
+    // Atribuições
+    assign booth_bits = {multiplier[0], q_minus1};
+    assign add_result = accumulator + {multiplicand[31], multiplicand}; // Extensão de sinal
+    assign sub_result = accumulator - {multiplicand[31], multiplicand}; // Extensão de sinal
+    
+    always @(posedge clk) begin
+        if (!mult_ctrl) begin
+            // Reset completo
+            state <= IDLE;
+            accumulator <= 33'b0;
+            multiplier <= 32'b0;
+            q_minus1 <= 1'b0;
+            multiplicand <= 32'b0;
+            count <= 6'b0;
             HI <= 32'b0;
             LO <= 32'b0;
-            MultDone <= 1'b0;
-            Initialize <= 1'b1;
-            Counter <= 7'b0;
-            A_Multiplicand_ComparePos <= 65'b0;
-            Multiplier <= 65'b0;
-            NegativeBTemp <= 32'b0;
-            Temp <= 65'b0;
-            mult_active <= 1'b0;
+            stop <= 1'b0;
         end
-        else if (MultCtrl && Initialize) begin
-            // Primeiro ciclo: inicialização dos registradores internos
-            Initialize <= 1'b0;
-            mult_active <= 1'b1;
-            MultDone <= 1'b0;
-            Counter <= 7'b0;
-            
-            // Inicializar registradores conforme algoritmo de Booth correto
-            A_Multiplicand_ComparePos[64:33] <= 32'b0;              // Registrador A inicializado com 0
-            A_Multiplicand_ComparePos[32:1] <= RegBOut;             // Multiplicador de RT
-            A_Multiplicand_ComparePos[0] <= 1'b0;                   // Bit extra para comparação
-            
-            Multiplier <= {33'b0, RegAOut};                        // Multiplicando de RS
-            NegativeBTemp <= (~RegAOut) + 32'd1;                   // Multiplicando negativo
-            Temp <= {33'b0, (~RegAOut) + 32'd1};                   // Temp com multiplicando negativo
-        end
-        else if (mult_active) begin
-                if (Counter < 7'd32) begin
-                    // Booth: comparar os dois bits menos significativos
-                     case (A_Multiplicand_ComparePos[1:0])
-                         2'b10: begin
-                             // 10: subtrair multiplicando e fazer shift
-                             A_Multiplicand_ComparePos <= $signed({A_Multiplicand_ComparePos[64:33] - RegAOut, A_Multiplicand_ComparePos[32:0]}) >>> 1;
-                         end
-                         2'b01: begin
-                             // 01: somar multiplicando e fazer shift
-                             A_Multiplicand_ComparePos <= $signed({A_Multiplicand_ComparePos[64:33] + RegAOut, A_Multiplicand_ComparePos[32:0]}) >>> 1;
-                         end
-                         default: begin
-                             // 00 ou 11: apenas fazer shift aritmético
-                             A_Multiplicand_ComparePos <= $signed(A_Multiplicand_ComparePos) >>> 1;
-                         end
-                     endcase
-                    
-                    Counter <= Counter + 1;
+        else begin
+            case (state)
+                IDLE: begin
+                    stop <= 1'b0;
+                    if (mult_ctrl) begin
+                        // Inicialização
+                        accumulator <= 33'b0;          // A = 0
+                        multiplier <= B;               // Q = multiplicador
+                        q_minus1 <= 1'b0;            // Q-1 = 0
+                        multiplicand <= A;            // M = multiplicando
+                        count <= 6'b0;
+                        state <= MULTIPLY;
+                    end
                 end
-                else begin
-                    HI <= A_Multiplicand_ComparePos[64:33];
-                    LO <= A_Multiplicand_ComparePos[32:1];
-                    MultDone <= 1'b1;
-                    mult_active <= 1'b0;
-                    Initialize <= 1'b1;
+                
+                MULTIPLY: begin
+                    if (count < 32) begin
+                        // Algoritmo de Booth seguido de shift
+                        case (booth_bits)
+                            2'b01: begin
+                                // Adicionar M e fazer shift
+                                accumulator <= {add_result[32], add_result[32:1]};
+                                {multiplier, q_minus1} <= {add_result[0], multiplier};
+                            end
+                            2'b10: begin
+                                // Subtrair M e fazer shift
+                                accumulator <= {sub_result[32], sub_result[32:1]};
+                                {multiplier, q_minus1} <= {sub_result[0], multiplier};
+                            end
+                            default: begin
+                                // Apenas shift (2'b00, 2'b11)
+                                accumulator <= {accumulator[32], accumulator[32:1]};
+                                {multiplier, q_minus1} <= {accumulator[0], multiplier};
+                            end
+                        endcase
+                        
+                        count <= count + 1;
+                    end
+                    else begin
+                        // Multiplicação concluída
+                        HI <= accumulator[31:0];   // 32 bits superiores
+                        LO <= multiplier;          // 32 bits inferiores
+                        state <= DONE;
+                    end
                 end
+                
+                DONE: begin
+                    stop <= 1'b1;
+                    if (!mult_ctrl) begin
+                        state <= IDLE;
+                    end
+                end
+                
+                default: state <= IDLE;
+            endcase
         end
     end
+
 endmodule

@@ -11,7 +11,7 @@ module mux_memToReg(
     input  wire [31:0] lo_data,         // LO_Out
     input  wire [31:0] shift_data,      // Shift_Out
     input  wire [31:0] pc_plus4_data,   // PC_Plus4_Out
-    output wire [31:0] mux_wd_reg_out
+    output reg [31:0] mux_wd_reg_out
 );
 
     always @(*) begin

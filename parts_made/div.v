@@ -1,30 +1,27 @@
 // Unidade de Divisão (DIV) - Realiza divisão de números inteiros com sinal
-// Implementa algoritmo de divisão por subtração sucessiva com tratamento de sinais
-// Produz quociente (LO) e resto (HI), detecta divisão por zero
+// Implementa divisão por subtração sucessiva
+// Produz quociente (LO) e resto (HI)
 module div (
-    input  wire [31:0] RegAOut,      // Recebe RS
-    input  wire [31:0] RegBOut,      // Recebe RT
+    input  wire [31:0] RegAOut,         // Dividendo (RS)
+    input  wire [31:0] RegBOut,         // Divisor (RT)
     input  wire        clk,
     input  wire        reset,
-    input  wire        DivCtrl,      // Ativa DIV
-    output reg         DivDone,      // Informa a unidade o término
-    output reg         Div0,         // caso ocorra uma divisão por 0
-    output reg  [31:0] HI,           // resto
-    output reg  [31:0] LO            // quociente
+    input  wire        DivCtrl,        // Início da divisão
+    
+    output reg         DivDone,        // Fim da divisão
+    output reg         Div0,           // Divisão por zero
+    output reg  [31:0] HI,             // Resto
+    output reg  [31:0] LO              // Quociente
 );
     // Registradores internos
-    reg        init_done; 
-    reg [31:0] aux_A, aux_B;        // Registradores aux
-    reg        sign_A, sign_B;      // Sinais dos registradores A e B
-    reg [31:0] counter;             // Contador
-    reg        div_active;          // Indica divisão ativa
-    
-    // ULA interna para subtração e comparação
-    wire [31:0] alu_result;
-    wire        alu_greater_equal;
-    
-    assign alu_result = aux_A - aux_B;
-    assign alu_greater_equal = (aux_A >= aux_B);
+    reg [31:0] dividend;        // Dividendo (valor absoluto)
+    reg [31:0] divisor;         // Divisor (valor absoluto)
+    reg [31:0] quotient;        // Quociente temporário
+    reg [31:0] remainder;       // Resto temporário
+    reg        sign_result;     // Sinal do resultado
+    reg        sign_remainder;  // Sinal do resto
+    reg        div_active;      // Divisão ativa
+    reg        init_done;       // Inicialização concluída
     
     always @(posedge clk or posedge reset) begin
         if (reset) begin
@@ -33,72 +30,63 @@ module div (
             LO <= 32'b0;
             DivDone <= 1'b0;
             Div0 <= 1'b0;
-            init_done <= 1'b0;
-            aux_A <= 32'b0;
-            aux_B <= 32'b0;
-            sign_A <= 1'b0;
-            sign_B <= 1'b0;
-            counter <= 32'b0;
+            dividend <= 32'b0;
+            divisor <= 32'b0;
+            quotient <= 32'b0;
+            remainder <= 32'b0;
+            sign_result <= 1'b0;
+            sign_remainder <= 1'b0;
             div_active <= 1'b0;
+            init_done <= 1'b0;
         end
         else if (DivCtrl) begin
             if (!init_done) begin
-                // Verificar divisão por zero primeiro
+                // Verificar divisão por zero
                 if (RegBOut == 32'b0) begin
                     Div0 <= 1'b1;
-                    HI <= 32'hFFFFFFFF;  // Maior valor possível de 32 bits
-                    LO <= 32'hFFFFFFFF;  // Maior valor possível de 32 bits
+                    HI <= 32'b0;  // Resto indefinido
+                    LO <= 32'b0;  // Quociente indefinido
                     DivDone <= 1'b1;
                     init_done <= 1'b0;
                     div_active <= 1'b0;
                 end
                 else begin
-                    // Inicialização dos registradores auxiliares
+                    // Inicialização para divisão
                     init_done <= 1'b1;
                     div_active <= 1'b1;
                     DivDone <= 1'b0;
                     Div0 <= 1'b0;
-                    counter <= 32'b0;
                     
-                    // Armazenar sinais e valores absolutos
-                    sign_A <= RegAOut[31];
-                    sign_B <= RegBOut[31];
-                    aux_A <= RegAOut[31] ? (~RegAOut + 1) : RegAOut;  // Valor absoluto de A
-                    aux_B <= RegBOut[31] ? (~RegBOut + 1) : RegBOut;  // Valor absoluto de B
+                    // Determinar sinais
+                    sign_result <= RegAOut[31] ^ RegBOut[31];  // XOR para sinal do quociente
+                    sign_remainder <= RegAOut[31];             // Resto tem sinal do dividendo
+                    
+                    // Valores absolutos
+                    dividend <= RegAOut[31] ? (~RegAOut + 1) : RegAOut;
+                    divisor <= RegBOut[31] ? (~RegBOut + 1) : RegBOut;
+                    quotient <= 32'b0;
+                    remainder <= 32'b0;
                 end
             end
             else if (div_active) begin
-                // Algoritmo de divisão
-                if (alu_greater_equal) begin
-                    aux_A <= alu_result;  // A = A - B
-                    counter <= counter + 1;  // Incrementar contador
+                // Algoritmo de subtração sucessiva simples
+                if (dividend >= divisor) begin
+                    dividend <= dividend - divisor;
+                    quotient <= quotient + 1;
                 end
                 else begin
-                     // Divisão concluída
-                     // - A e B negativos: divisão positiva
-                     // - Só A ou só B negativo: divisão negativa
-                     // - Ambos positivos: divisão positiva
-                     if ((sign_A && sign_B) || (!sign_A && !sign_B)) begin
-                         // Ambos negativos ou ambos positivos -> resultado positivo
-                         LO <= counter;
-                     end
-                     else begin
-                         // Um negativo, outro positivo -> resultado negativo
-                         LO <= ~counter + 1;
-                     end
-                     
-                     if (sign_A) begin
-                         HI <= ~aux_A + 1;  // Resto negativo
-                     end
-                     else begin
-                         HI <= aux_A;       // Resto positivo
-                     end
-                     
-                     DivDone <= 1'b1;
-                     div_active <= 1'b0;
-                     init_done <= 1'b0;
-                 end
-             end
+                    // Divisão concluída
+                    remainder <= dividend;
+                    
+                    // Aplicar sinais
+                    LO <= sign_result ? (~quotient + 1) : quotient;
+                    HI <= sign_remainder ? (~dividend + 1) : dividend;
+                    
+                    DivDone <= 1'b1;
+                    div_active <= 1'b0;
+                    init_done <= 1'b0;
+                end
+            end
         end
         else begin
             // DivCtrl desativado -> resetar flags
