@@ -1,9 +1,6 @@
-// Unidade de SS (Store Size)
-// Entrada:
-// RegBOut(32 bits): valor novo a ser salvo na memória
-// RegMDROut(32 bits): valor antigo na memória
-// RegSSControl(2 bits): seleção de como irá salvar o valor
-// Saída: SSControlOut(32 bits): valor a ser armazenado na memória
+// Unidade de Store Size (SS) - Controla o tamanho dos dados armazenados na memória
+// Permite armazenar byte, halfword ou word, preservando dados não modificados
+// Usado nas instruções SB, SH e SW para escrever dados de diferentes tamanhos
 
 module ss (
     input  wire [1:0]  RegSSControl,    // Seleção: 00=byte, 01=halfword, 10=word

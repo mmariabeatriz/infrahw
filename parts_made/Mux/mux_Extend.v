@@ -1,3 +1,6 @@
+// Multiplexador Extend - Seleciona qual valor de 16 bits será estendido
+// Permite escolher entre dados de load size ou valor imediato da instrução
+// Usado para controlar qual valor será processado pela unidade de extensão de sinal
 module mux_Extend(
     input  wire        seletor,
     input  wire [15:0] load_size_data,  // Entrada de dados de load size

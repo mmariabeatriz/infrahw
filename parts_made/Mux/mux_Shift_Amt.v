@@ -1,3 +1,6 @@
+// Multiplexador Shift_Amt - Seleciona a quantidade de deslocamento para operações de shift
+// Permite escolher entre registrador B, campo imediato, dados da memória ou campo shamt
+// Controla quantas posições serão deslocadas nas instruções SLL, SRA, etc.
 module mux_Shift_Amt (
     input wire [1:0] seletor,
     input wire [31:0] reg_B_data,

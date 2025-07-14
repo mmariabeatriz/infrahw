@@ -1,3 +1,6 @@
+// Multiplexador IorD - Seleciona o endereço de memória (Instruction or Data)
+// Permite escolher entre resultado da ALU, ALUOut ou endereços especiais (253, 254, 255)
+// Controla se o acesso à memória será para buscar instrução ou acessar dados
 module mux_IorD (
 
     input  wire [2:0]  seletor,

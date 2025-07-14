@@ -1,3 +1,6 @@
+// Multiplexador memToReg - Seleciona qual valor será escrito no banco de registradores
+// Permite escolher entre ALUOut, memória, MDR, HI, LO, shift, PC+4 ou constante 227
+// Controla a fonte dos dados que serão armazenados no registrador de destino
 module mux_memToReg(
 
     input  wire [2:0]  seletor,

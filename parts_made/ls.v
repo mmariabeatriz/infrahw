@@ -1,8 +1,6 @@
-// Unidade de LS (Load Size)
-// Entrada:
-// RegMDROut(32 bits): valor obtido da memória
-// LSControl(2 bits): seleção de como irá ser salvo o valor no banco de registradores
-// Saída: LSControlOut(32 bits): valor a ser armazenado no banco de registradores
+// Unidade de Load Size (LS) - Controla o tamanho dos dados carregados da memória
+// Permite carregar byte, halfword ou word, ajustando o formato para 32 bits
+// Usado nas instruções LB, LH e LW para processar dados de diferentes tamanhos
 
 module ls(
     input  wire [1:0] LSControl,        // Seleção: 00=byte, 01=halfword, 10=word

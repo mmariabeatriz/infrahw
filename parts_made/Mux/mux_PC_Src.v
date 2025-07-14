@@ -1,3 +1,6 @@
+// Multiplexador PC_Src - Seleciona a fonte do próximo valor do Program Counter
+// Permite escolher entre EPC, resultado da ALU, ALUOut ou endereço concatenado
+// Controla o fluxo de execução do programa (sequencial, branch, jump, exceção)
 module mux_PC_Src(
 
     input  wire [1:0] seletor,

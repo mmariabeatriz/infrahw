@@ -1,3 +1,6 @@
+// Multiplexador Low - Seleciona a fonte dos 32 bits menos significativos (registrador LO)
+// Permite escolher entre resultado da multiplicação ou divisão para o registrador LO
+// Usado nas instruções MFLO para acessar a parte baixa do resultado de operações aritméticas
 module mux_Low(
 
     input  wire        seletor,

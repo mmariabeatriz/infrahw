@@ -1,3 +1,6 @@
+// Multiplexador B - Seleciona a fonte de dados para o registrador B
+// Permite escolher entre dados do registrador 2 ou dados da memória
+// Usado para controlar qual valor será armazenado no registrador B durante a execução
 module mux_B(
 
     input  wire        seletor,

@@ -1,3 +1,6 @@
+// Multiplexador ALUSrcA - Seleciona a primeira entrada da ALU
+// Permite escolher entre PC, dados do registrador A ou constante 0
+// Controla qual valor será usado como primeiro operando nas operações da ALU
 module mux_ALUSrcA(
 
     input  wire [1:0] seletor,

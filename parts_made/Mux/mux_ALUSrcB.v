@@ -1,3 +1,6 @@
+// Multiplexador ALUSrcB - Seleciona a segunda entrada da ALU
+// Permite escolher entre dados do registrador B, constante 4, valor com extensão de sinal ou valor deslocado
+// Controla qual valor será usado como segundo operando nas operações da ALU
 module mux_ALUSrcB (
 
     input  wire [1:0] seletor,

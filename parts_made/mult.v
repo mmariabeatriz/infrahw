@@ -1,3 +1,6 @@
+// Unidade de Multiplicação (MULT) - Realiza multiplicação de números inteiros com sinal
+// Implementa algoritmo de Booth para multiplicação eficiente
+// Produz resultado de 64 bits: parte alta (HI) e parte baixa (LO)
 module mult (
     input  wire [31:0] RegAOut,         // Recebe RS
     input  wire [31:0] RegBOut,         // Recebe RT

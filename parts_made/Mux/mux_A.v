@@ -1,3 +1,6 @@
+// Multiplexador A - Seleciona a fonte de dados para o registrador A
+// Permite escolher entre dados da memória, dados do registrador 1 ou dados do registrador 2
+// Usado para controlar qual valor será armazenado no registrador A durante a execução
 module mux_A(
 
     input  wire [1:0]  seletor,

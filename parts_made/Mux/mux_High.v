@@ -1,3 +1,6 @@
+// Multiplexador High - Seleciona a fonte dos 32 bits mais significativos (registrador HI)
+// Permite escolher entre resultado da multiplicação ou divisão para o registrador HI
+// Usado nas instruções MFHI para acessar a parte alta do resultado de operações aritméticas
 module mux_High(
 
     input  wire        seletor,

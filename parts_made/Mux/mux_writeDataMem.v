@@ -1,3 +1,6 @@
+// Multiplexador writeDataMem - Seleciona os dados que serão escritos na memória
+// Permite escolher entre dados do registrador B ou dados processados pelo store size
+// Controla qual valor será armazenado na memória durante operações de store (SW, SB)
 module mux_writeDataMem(
 
     input  wire        seletor,

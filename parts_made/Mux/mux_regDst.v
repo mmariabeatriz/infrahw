@@ -1,3 +1,6 @@
+// Multiplexador regDst - Seleciona o registrador de destino para escrita
+// Permite escolher entre RT, registrador 29, registrador 31 ou RD da instrução
+// Controla qual registrador receberá o resultado da operação (R-type, I-type, JAL, etc.)
 module mux_regDst(
 
     input  wire [1:0]  seletor,

@@ -1,3 +1,6 @@
+// Multiplexador Shift_Src - Seleciona a fonte de dados para operações de deslocamento
+// Permite escolher entre dados do registrador A ou registrador B
+// Controla qual valor será deslocado nas instruções de shift (SLL, SRA, etc.)
 module mux_Shift_Src(
 
     input  wire        seletor,

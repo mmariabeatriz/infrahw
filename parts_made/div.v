@@ -1,3 +1,6 @@
+// Unidade de Divisão (DIV) - Realiza divisão de números inteiros com sinal
+// Implementa algoritmo de divisão por subtração sucessiva com tratamento de sinais
+// Produz quociente (LO) e resto (HI), detecta divisão por zero
 module div (
     input  wire [31:0] RegAOut,      // Recebe RS
     input  wire [31:0] RegBOut,      // Recebe RT
