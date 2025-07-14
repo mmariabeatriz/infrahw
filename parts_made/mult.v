@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-// Multiplicador com Algoritmo de Booth - VERSÃO CORRIGIDA
+// Multiplicador com Algoritmo de Booth
 // Realiza multiplicação de dois números de 32 bits com sinal
 // Produz resultado de 64 bits em 32 ciclos
 module mult(
