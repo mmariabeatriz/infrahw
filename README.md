@@ -80,10 +80,8 @@ infrahw/
 │   ├── se.v              # Sign Extend - extensão de sinal 16→32 bits
 │   ├── mux/              # Multiplexadores para seleção de dados
 │   ├── test/             # Testes organizados por tipo
-│   │   ├── R-type/       # Testes para instruções R
-│   │   ├── I-type/       # Testes para instruções I
-│   │   ├── J-type/       # Testes para instruções J
-│   │   └── exceptions/   # Testes de exceções
+│   │   ├── complete      # Testes gerais das instruções e exceções
+│   │   └── debug         # Testes de debug dos módulos
 │   └── *.v               # Outros módulos auxiliares
 └── README.md             # Este arquivo
 ```
