@@ -276,7 +276,6 @@ module control_unit(
     task handle_add_state;
         begin
             reg_dst = 1'b1;
-            alu_src = 1'b0; // Use register
             alu_op = 4'b0010; // ADD
             alu_control = 4'b0010; // ADD
             reg_write = 1'b1;
@@ -288,7 +287,6 @@ module control_unit(
     task handle_and_state;
         begin
             reg_dst = 1'b1;
-            alu_src = 1'b0; // Use register
             alu_op = 4'b0001; // AND
             alu_control = 4'b0001; // AND
             reg_write = 1'b1;
@@ -298,7 +296,6 @@ module control_unit(
 
     task handle_div_state;
         begin
-            alu_src = 1'b0; // Use register
             alu_op = 4'b1001; // DIV
             alu_control = 4'b1001; // DIV
             if (div_zero) state = ST_DIV0;
@@ -308,7 +305,6 @@ module control_unit(
 
     task handle_mult_state;
         begin
-            alu_src = 1'b0; // Use register
             alu_op = 4'b1010; // MULT
             alu_control = 4'b1010; // MULT
             state = ST_FETCH;
@@ -326,7 +322,6 @@ module control_unit(
     task handle_mfhi_state;
         begin
             reg_dst = 1'b1;
-            alu_src = 1'b0; // Use register
             alu_op = 4'b1100; // MFHI
             alu_control = 4'b1100; // MFHI
             reg_write = 1'b1;
@@ -337,7 +332,6 @@ module control_unit(
     task handle_mflo_state;
         begin
             reg_dst = 1'b1;
-            alu_src = 1'b0; // Use register
             alu_op = 4'b1101; // MFLO
             alu_control = 4'b1101; // MFLO
             reg_write = 1'b1;
@@ -348,7 +342,6 @@ module control_unit(
     task handle_sll_state;
         begin
             reg_dst = 1'b1;
-            alu_src = 1'b0; // Use register
             alu_op = 4'b0100; // SLL
             alu_control = 4'b0100; // SLL
             reg_write = 1'b1;
@@ -360,7 +353,6 @@ module control_unit(
     task handle_slt_state;
         begin
             reg_dst = 1'b1;
-            alu_src = 1'b0; // Use register
             alu_op = 4'b0111; // SLT
             alu_control = 4'b0111; // SLT
             reg_write = 1'b1;
@@ -371,7 +363,6 @@ module control_unit(
     task handle_sra_state;
         begin
             reg_dst = 1'b1;
-            alu_src = 1'b0; // Use register
             alu_op = 4'b0101; // SRA
             alu_control = 4'b0101; // SRA
             reg_write = 1'b1;
@@ -383,7 +374,6 @@ module control_unit(
     task handle_sub_state;
         begin
             reg_dst = 1'b1;
-            alu_src = 1'b0; // Use register
             alu_op = 4'b0110; // SUB
             alu_control = 4'b0110; // SUB
             reg_write = 1'b1;
@@ -395,7 +385,6 @@ module control_unit(
     task handle_xchg_state;
         begin
             reg_dst = 1'b1;
-            alu_src = 1'b0; // Use register
             alu_op = 4'b1011; // XCHG
             alu_control = 4'b1011; // XCHG
             reg_write = 1'b1;
