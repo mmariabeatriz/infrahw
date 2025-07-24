@@ -5,9 +5,6 @@
 
 Este projeto implementa um processador MIPS de 32 bits com arquitetura multiciclo, desenvolvido como parte da disciplina de Infraestrutura de Hardware.
 
-## Visão Geral
-O processador implementa uma versão simplificada da arquitetura MIPS com suporte a instruções básicas dos tipos R, I e J. A implementação utiliza uma máquina de estados finita para controlar a execução das instruções em múltiplos ciclos de clock.
-
 ### Características Principais
 - **Arquitetura**: MIPS 32 bits multiciclo
 - **Tipos de Instrução**: R-type, I-type, J-type
@@ -202,65 +199,3 @@ module test_nome;
 endmodule
 ```
 
-##### 2. Passos para Criar um Novo Teste
-1. **Defina o objetivo**: Qual funcionalidade será testada?
-2. **Identifique os módulos**: Quais módulos precisam ser instanciados?
-3. **Declare os sinais**: Entradas (reg) e saídas (wire)
-4. **Instancie os módulos**: Conecte os sinais corretamente
-5. **Implemente os testes**: Use tasks para organizar
-6. **Adicione verificações**: Compare resultados esperados
-7. **Compile e execute**: Verifique se funciona corretamente
-
-##### 3. Boas Práticas
-- Use tasks para organizar diferentes tipos de teste
-- Adicione displays informativos para acompanhar a execução
-- Verifique sempre os sinais de controle relevantes
-- Aguarde ciclos suficientes para a operação completar
-- Use nomes descritivos para sinais e tasks
-- Documente o propósito de cada teste
-
-##### 4. Exemplo de Verificação
-```verilog
-task verificar_resultado;
-    input [31:0] esperado;
-    input [31:0] obtido;
-    input [50*8:1] nome_teste;
-    begin
-        if (esperado == obtido) begin
-            $display("[PASS] %s: %h == %h", nome_teste, esperado, obtido);
-        end else begin
-            $display("[FAIL] %s: esperado %h, obtido %h", nome_teste, esperado, obtido);
-        end
-    end
-endtask
-```
-
-## Compatibilidade
-- Sintaxe Verilog padrão
-- Compatível com Icarus Verilog
-- Geração de VCD para análise visual
-- Testado no Windows com PowerShell
-
-## Desenvolvimento
-### Arquivos Principais
-
-- `control_unit.v`: Implementação da máquina de estados principal
-- `mult.v`: Unidade de multiplicação com algoritmo de Booth
-- `div.v`: Unidade de divisão por subtração sucessiva com detecção de divisão por zero
-- `ls.v`: Load Size - processa dados carregados (byte, halfword, word)
-- `ss.v`: Store Size - processa dados armazenados preservando bytes não modificados
-- `se.v`: Sign Extend - extensão de sinal de 16 para 32 bits
-- `mux/*.v`: Multiplexadores para seleção de dados no datapath
-- `test/*.v`: Testbenches para validação de todos os componentes
-
-## Notas Técnicas
-- A ULA opera com códigos 000 (inicial), 001 (soma) e 010 (subtração)
-- O comportamento de alternância da ULA entre 000 e 001 é esperado
-- Instruções JAL salvam PC+4 no registrador $ra (31)
-- Branches calculam endereço como PC + 4 + offset
-
----
-
-**Disciplina**: Infraestrutura de Hardware  
-**Período**: 2025.1  
-**Arquitetura**: MIPS 32 bits Multiciclo
